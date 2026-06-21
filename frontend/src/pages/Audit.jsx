@@ -70,7 +70,7 @@ export default function Audit() {
           <div className="empty"><div className="empty-icon">🔍</div><p>Website URL enter karo aur audit chalao</p></div>
         )}
       </main>
-      <footer className="footer">IA Audit Pro · Powered by Claude AI</footer>
+      <footer className="footer">IA Audit Pro · Powered by Groq AI</footer>
     </div>
   )
 }
