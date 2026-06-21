@@ -24,7 +24,7 @@ Include 4-6 real items per category based on ${url}. Use types: critical, warnin
         },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
-          max_tokens: 1000,
+          max_tokens: 4000,
           messages: [{ role: 'user', content: prompt }]
         })
       })
