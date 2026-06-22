@@ -30,6 +30,8 @@ fastify.decorate('authenticate', async (req, reply) => {
 await fastify.register(authRoutes, { prefix: '/api/auth' })
 await fastify.register(auditRoutes, { prefix: '/api/audit' })
 await fastify.register(historyRoutes, { prefix: '/api/history' })
+import paymentRoutes from './routes/payment.js'
+await fastify.register(paymentRoutes, { prefix: '/api/payment' })
 
 // Health check
 fastify.get('/health', async () => ({ status: 'ok' }))
