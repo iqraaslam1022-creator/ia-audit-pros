@@ -15,18 +15,24 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  // Auth
   signup: (email, password) =>
     request('/api/auth/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
   login: (email, password) =>
     request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+
+  // Audit
   runAudit: (url) =>
     request('/api/audit/run', { method: 'POST', body: JSON.stringify({ url }) }),
   askAI: (auditId, question, history) =>
     request('/api/audit/ask', { method: 'POST', body: JSON.stringify({ auditId, question, history }) }),
-  compareAudit: (myUrl, competitorUrl) =>
-    request('/api/audit/compare', { method: 'POST', body: JSON.stringify({ myUrl, competitorUrl }) }),
-  autoFix: (title, desc, fix) =>
-    request('/api/audit/fix', { method: 'POST', body: JSON.stringify({ title, desc, fix }) }),  // ✅ YEH NAYA
+
+  // History
   getHistory: () => request('/api/history'),
   getAudit: (id) => request(`/api/history/${id}`),
+
+  // Payment
+  createCheckout: (plan) =>
+    request('/api/payment/create-checkout', { method: 'POST', body: JSON.stringify({ plan }) }),
+  getPlan: () => request('/api/payment/plan'),
 }
