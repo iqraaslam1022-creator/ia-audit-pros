@@ -22,7 +22,7 @@
           'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
         },
         body: JSON.stringify({
-          from: 'IA Audit Pro <onboarding@resend.dev>',
+          from: 'IA Audit Pro <noreply@iaauditpro.online>',
           to: email,
           subject: '⚡ Welcome to IA Audit Pro!',
           html: `
