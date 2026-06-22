@@ -24,7 +24,9 @@ export const api = {
   askAI: (auditId, question, history) =>
     request('/api/audit/ask', { method: 'POST', body: JSON.stringify({ auditId, question, history }) }),
   compareAudit: (myUrl, competitorUrl) =>
-    request('/api/audit/compare', { method: 'POST', body: JSON.stringify({ myUrl, competitorUrl }) }),  // ✅ YEH ADD KARO
+    request('/api/audit/compare', { method: 'POST', body: JSON.stringify({ myUrl, competitorUrl }) }),
+  autoFix: (title, desc, fix) =>
+    request('/api/audit/fix', { method: 'POST', body: JSON.stringify({ title, desc, fix }) }),  // ✅ YEH NAYA
   getHistory: () => request('/api/history'),
   getAudit: (id) => request(`/api/history/${id}`),
 }
