@@ -1,45 +1,13 @@
- import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import ScoreHistoryChart from '../components/ScoreHistoryChart'
-import CompetitorAnalysis from '../components/CompetitorAnalysis'
 import { api } from '../lib/api'
-
-const PLANS = [
-  {
-    name: 'Free',
-    price: '$0',
-    period: '/month',
-    color: 'var(--border)',
-    features: ['3 audits/month', 'Basic SEO check', 'PDF export', 'AI Chat'],
-    cta: 'Current Plan',
-    disabled: true,
-  },
-  {
-    name: 'Pro',
-    price: '$19',
-    period: '/month',
-    color: 'var(--purple)',
-    features: ['Unlimited audits', 'Competitor analysis', 'Score history', 'Priority support', 'White-label PDF'],
-    cta: 'Upgrade to Pro',
-    disabled: false,
-    highlight: true,
-  },
-  {
-    name: 'Agency',
-    price: '$49',
-    period: '/month',
-    color: '#059669',
-    features: ['Everything in Pro', 'Multi-client dashboard', '10 team members', 'API access', 'Custom branding'],
-    cta: 'Contact Sales',
-    disabled: false,
-  },
-]
 
 export default function Dashboard() {
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('history')
+  const [plan, setPlan] = useState('free')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -47,7 +15,20 @@ export default function Dashboard() {
       .then(data => setHistory(data.audits || []))
       .catch(() => {})
       .finally(() => setLoading(false))
+    
+    api.getPlan()
+      .then(data => setPlan(data.plan || 'free'))
+      .catch(() => {})
   }, [])
+
+  async function handleUpgrade(planName) {
+    try {
+      const res = await api.createCheckout(planName)
+      window.location.href = res.url
+    } catch (e) {
+      alert('Error: ' + e.message)
+    }
+  }
 
   function scoreColor(v) {
     if (v >= 80) return { background: '#EAF3DE', color: '#3B6D11' }
@@ -59,8 +40,6 @@ export default function Dashboard() {
     <div className="layout">
       <Navbar />
       <main className="main">
-
-        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <h1 className="page-title" style={{ margin: 0 }}>Dashboard</h1>
           <button className="btn btn-primary" onClick={() => navigate('/audit')}>⚡ New Audit</button>
@@ -68,17 +47,13 @@ export default function Dashboard() {
 
         {/* Tabs */}
         <div className="tabs" style={{ marginBottom: '1.5rem' }}>
-          {[['history', '📋 Audit History'], ['compare', '⚔️ Competitor'], ['pricing', '💳 Pricing']].map(([id, label]) => (
-            <button key={id} className={`tab${activeTab === id ? ' active' : ''}`} onClick={() => setActiveTab(id)}>
-              {label}
-            </button>
-          ))}
+          <button className={`tab${activeTab === 'history' ? ' active' : ''}`} onClick={() => setActiveTab('history')}>📋 Audit History</button>
+          <button className={`tab${activeTab === 'pricing' ? ' active' : ''}`} onClick={() => setActiveTab('pricing')}>💳 Pricing</button>
         </div>
 
         {/* History Tab */}
         {activeTab === 'history' && (
           <>
-            <ScoreHistoryChart history={history} />
             {loading && <p style={{ color: 'var(--muted)', fontSize: 14 }}>Loading...</p>}
             {!loading && history.length === 0 && (
               <div className="empty">
@@ -110,48 +85,49 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* Competitor Tab */}
-        {activeTab === 'compare' && <CompetitorAnalysis />}
-
         {/* Pricing Tab */}
         {activeTab === 'pricing' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-            {PLANS.map(plan => (
-              <div key={plan.name} className="card" style={{
-                border: plan.highlight ? `2px solid var(--purple)` : '1px solid var(--border)',
-                position: 'relative',
-              }}>
-                {plan.highlight && (
-                  <div style={{
-                    position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
-                    background: 'var(--purple)', color: '#fff', fontSize: 11, fontWeight: 700,
-                    padding: '3px 14px', borderRadius: 20,
-                  }}>⭐ MOST POPULAR</div>
-                )}
-                <div style={{ fontWeight: 800, fontSize: 20, marginBottom: 4 }}>{plan.name}</div>
-                <div style={{ fontSize: 32, fontWeight: 800, color: plan.color }}>
-                  {plan.price}<span style={{ fontSize: 14, fontWeight: 400, color: 'var(--muted)' }}>{plan.period}</span>
-                </div>
-                <div style={{ margin: '1rem 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {plan.features.map(f => (
-                    <div key={f} style={{ fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <span style={{ color: '#059669' }}>✓</span> {f}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  className={`btn ${plan.highlight ? 'btn-primary' : ''}`}
-                  style={{ width: '100%', marginTop: 8 }}
-                  disabled={plan.disabled}
-                  onClick={() => !plan.disabled && alert('Payment integration coming soon! 🚀')}
-                >
-                  {plan.cta}
-                </button>
-              </div>
-            ))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+            {/* Free */}
+            <div className="card" style={{ border: plan === 'free' ? '2px solid var(--purple)' : '1px solid var(--border)' }}>
+              <h3 style={{ fontSize: 20, marginBottom: 8 }}>Free</h3>
+              <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 16 }}>$0<span style={{ fontSize: 14, fontWeight: 400 }}>/month</span></div>
+              {['3 audits/month', 'Basic SEO check', 'PDF export', 'AI Chat'].map(f => (
+                <p key={f} style={{ fontSize: 13, marginBottom: 6 }}>✓ {f}</p>
+              ))}
+              <button className="btn" style={{ width: '100%', marginTop: '1rem' }} disabled>
+                {plan === 'free' ? 'Current Plan' : 'Free'}
+              </button>
+            </div>
+
+            {/* Pro */}
+            <div className="card" style={{ border: plan === 'pro' ? '2px solid var(--purple)' : '1px solid var(--border)', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--purple)', color: 'white', padding: '2px 16px', borderRadius: 20, fontSize: 12 }}>⭐ Popular</div>
+              <h3 style={{ fontSize: 20, marginBottom: 8 }}>Pro</h3>
+              <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 16 }}>$19<span style={{ fontSize: 14, fontWeight: 400 }}>/month</span></div>
+              {['Unlimited audits', 'Competitor analysis', 'White-label PDF', 'Email reports', 'Priority support'].map(f => (
+                <p key={f} style={{ fontSize: 13, marginBottom: 6 }}>✓ {f}</p>
+              ))}
+              <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}
+                onClick={() => handleUpgrade('pro')} disabled={plan === 'pro'}>
+                {plan === 'pro' ? 'Current Plan' : 'Upgrade to Pro'}
+              </button>
+            </div>
+
+            {/* Agency */}
+            <div className="card" style={{ border: plan === 'agency' ? '2px solid var(--purple)' : '1px solid var(--border)' }}>
+              <h3 style={{ fontSize: 20, marginBottom: 8 }}>Agency</h3>
+              <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 16 }}>$49<span style={{ fontSize: 14, fontWeight: 400 }}>/month</span></div>
+              {['Everything in Pro', '10 team members', 'API access', 'Custom branding', 'Multi-client dashboard'].map(f => (
+                <p key={f} style={{ fontSize: 13, marginBottom: 6 }}>✓ {f}</p>
+              ))}
+              <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}
+                onClick={() => handleUpgrade('agency')} disabled={plan === 'agency'}>
+                {plan === 'agency' ? 'Current Plan' : 'Upgrade to Agency'}
+              </button>
+            </div>
           </div>
         )}
-
       </main>
       <footer className="footer">IA Audit Pro · Powered by Groq AI</footer>
     </div>
