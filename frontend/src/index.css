@@ -1,60 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap');
-
 :root {
-  /* Rolex Palette */
-  --green: #006039;
-  --green-dark: #004A2C;
-  --green-light: #E8F2EC;
-  --green-mid: #2D7A56;
-  --gold: #A67C52;
-  --gold-light: #C9A96E;
-  --gold-bg: #FAF6F0;
-
-  /* Neutrals */
-  --bg: #F8F6F1;
-  --bg-2: #FFFFFF;
-  --bg-3: #F2EFE8;
-  --card: #FFFFFF;
-  --card-hover: #FAFAF8;
-  --border: #E5DFD3;
-  --border-dark: #C8BFB0;
-
-  /* Text */
-  --text: #1A1A14;
-  --text-2: #4A4A3E;
-  --muted: #8A8A78;
-
-  /* Status */
-  --status-green: #2D7A56;
-  --green-bg: #EAF3EE;
-  --amber: #9A6B1A;
-  --amber-bg: #FBF3E4;
-  --red: #8A2020;
-  --red-bg: #F9EDED;
-  --blue: #1A4A7A;
-  --blue-bg: #E8EEF6;
-
-  /* Shape */
-  --radius: 8px;
+  --purple: #534AB7;
+  --purple-dark: #3C3489;
+  --purple-light: #EEEDFE;
+  --bg: #f5f5fa;
+  --card: #ffffff;
+  --border: #e2e2ef;
+  --text: #1a1a2e;
+  --muted: #6b6b8a;
+  --green: #3B6D11;
+  --green-bg: #EAF3DE;
+  --amber: #854F0B;
+  --amber-bg: #FAEEDA;
+  --red: #A32D2D;
+  --red-bg: #FCEBEB;
+  --blue: #185FA5;
+  --blue-bg: #E6F1FB;
+  --radius: 10px;
   --radius-lg: 14px;
-  --radius-xl: 20px;
-
-  /* Shadow */
-  --shadow: 0 2px 20px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
-  --shadow-green: 0 4px 20px rgba(0,96,57,0.15);
 }
 
 body {
-  font-family: 'Montserrat', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
 }
 
-button { cursor: pointer; font-family: 'Montserrat', sans-serif; transition: all 0.25s; }
-input, textarea { font-family: 'Montserrat', sans-serif; }
+button { cursor: pointer; font-family: inherit; }
+input, textarea { font-family: inherit; }
 a { text-decoration: none; color: inherit; }
