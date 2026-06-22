@@ -130,6 +130,57 @@ Provide ONLY the ready-to-use code fix (HTML/CSS/JS) with a brief one-line comme
       return reply.code(500).send({ message: e.message })
     }
   })
+  // ─── Audit Complete Email ─────────────────────────────────────────────────────
+async function sendAuditEmail(email, url, scores, summary) {
+  function scoreColor(v) { return v >= 80 ? '#2D7A56' : v >= 50 ? '#9A6B1A' : '#8A2020' }
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
+    },
+    body: JSON.stringify({
+      from: 'IA Audit Pro <onboarding@resend.dev>',
+      to: email,
+      subject: `Audit Complete: ${url}`,
+      html: `
+        <div style="font-family: 'Montserrat', sans-serif; max-width: 560px; margin: 0 auto; background: #F8F6F1; border-radius: 16px; overflow: hidden;">
+          <div style="background: #006039; padding: 32px; text-align: center;">
+            <h1 style="color: white; font-size: 24px; letter-spacing: 3px; margin: 0; text-transform: uppercase;">IA Audit Pro</h1>
+            <p style="color: rgba(255,255,255,0.7); font-size: 12px; letter-spacing: 2px; margin-top: 6px;">AUDIT COMPLETE</p>
+          </div>
+          <div style="padding: 40px 32px;">
+            <h2 style="color: #1A1A14; font-size: 20px; margin-bottom: 6px;">Your audit is ready! 📊</h2>
+            <p style="color: #8A8A78; font-size: 13px; margin-bottom: 24px;">${url}</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px;">
+              ${['seo','performance','security','bugs'].map(k => `
+                <div style="background: white; border-radius: 10px; padding: 16px; text-align: center; border: 1px solid #E5DFD3;">
+                  <p style="color: #8A8A78; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">${k}</p>
+                  <p style="color: ${scoreColor(scores[k])}; font-size: 32px; font-weight: 700; margin: 0;">${scores[k]}</p>
+                  <p style="color: #8A8A78; font-size: 11px;">/100</p>
+                </div>
+              `).join('')}
+            </div>
+
+            <div style="background: #E8F2EC; border-radius: 10px; padding: 16px; margin-bottom: 24px;">
+              <p style="color: #006039; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">AI Summary</p>
+              <p style="color: #4A4A3E; font-size: 13px; line-height: 1.8; margin: 0;">${summary}</p>
+            </div>
+
+            <a href="${process.env.FRONTEND_URL}/audit"
+               style="display: block; background: #006039; color: white; text-align: center; padding: 14px; border-radius: 8px; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-decoration: none; text-transform: uppercase;">
+              View Full Report →
+            </a>
+          </div>
+          <div style="padding: 20px 32px; border-top: 1px solid #E5DFD3; text-align: center;">
+            <p style="color: #8A8A78; font-size: 11px; letter-spacing: 1px;">IA AUDIT PRO · POWERED BY GROQ AI</p>
+          </div>
+        </div>
+      `
+    })
+  })
+}
 }
  
  
