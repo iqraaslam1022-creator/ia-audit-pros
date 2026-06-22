@@ -1,89 +1,117 @@
-export default async function auditRoutes(fastify) {
+import { useState } from 'react'
+import { api } from '../lib/api'
 
-  fastify.post('/run', { onRequest: [fastify.authenticate] }, async (req, reply) => {
-    const { url } = req.body
-    const userId = req.user.id
-    if (!url) return reply.code(400).send({ message: 'URL zaroori hai' })
-    const prompt = `You are a professional website SEO and technical auditor. Analyze: ${url}
-Return ONLY raw JSON (no markdown, no backticks, just pure JSON):
-{"scores":{"seo":0,"performance":0,"security":0,"bugs":0},"seo":[{"type":"warning","title":"title","desc":"desc","fix":"fix"}],"performance":[{"type":"warning","title":"title","desc":"desc","fix":"fix"}],"security":[{"type":"warning","title":"title","desc":"desc","fix":"fix"}],"bugs":[{"type":"info","title":"title","desc":"desc","fix":"fix"}],"summary":"overview here"}
-Include 4-6 items per category. Scores 0-100.`
-    try {
-      const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
-        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] })
-      })
-      const aiData = await aiRes.json()
-      if (!aiData.choices || !aiData.choices[0]) throw new Error('AI response invalid: ' + JSON.stringify(aiData))
-      const raw = aiData.choices[0].message.content.trim()
-      const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim()
-      const auditResult = JSON.parse(clean)
-      auditResult.url = url
-      auditResult.date = new Date().toISOString()
-      const { data, error } = await fastify.supabase.from('audits').insert({
-        user_id: userId, url,
-        scores: auditResult.scores,
-        seo: auditResult.seo,
-        performance: auditResult.performance,
-        security: auditResult.security,
-        bugs: auditResult.bugs,
-        summary: auditResult.summary,
-      }).select().single()
-      if (error) throw new Error(error.message)
-      return { audit: { ...auditResult, id: data.id } }
-    } catch (e) {
-      fastify.log.error(e)
-      return reply.code(500).send({ message: e.message })
-    }
-  })
+export default function CompetitorAnalysis() {
+  const [myUrl, setMyUrl] = useState('')
+  const [compUrl, setCompUrl] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
 
-  fastify.post('/ask', { onRequest: [fastify.authenticate] }, async (req, reply) => {
-    const { question, history } = req.body
+  async function runComparison() {
+    if (!myUrl || !compUrl) return
+    setLoading(true)
+    setError('')
+    setResult(null)
     try {
-      const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          max_tokens: 1000,
-          messages: [
-            { role: 'system', content: 'You are a helpful website audit expert. Answer concisely.' },
-            ...history
-          ]
-        })
-      })
-      const data = await aiRes.json()
-      return { reply: data.choices[0].message.content }
+      const data = await api.compareAudit(myUrl, compUrl)
+      setResult(data.comparison)
     } catch (e) {
-      return reply.code(500).send({ message: e.message })
+      setError(e.message)
+    } finally {
+      setLoading(false)
     }
-  })
+  }
 
-  fastify.post('/compare', { onRequest: [fastify.authenticate] }, async (req, reply) => {
-    const { myUrl, competitorUrl } = req.body
-    if (!myUrl || !competitorUrl) return reply.code(400).send({ message: 'Dono URLs zaroori hain' })
-    const prompt = `You are a professional website auditor. Compare these two websites:
-My website: ${myUrl}
-Competitor website: ${competitorUrl}
-Return ONLY raw JSON (no markdown, no backticks):
-{"my":{"scores":{"seo":75,"performance":60,"security":80,"bugs":70},"overall":71},"competitor":{"scores":{"seo":65,"performance":70,"security":75,"bugs":80},"overall":72},"winner":"my","advantages":["advantage 1","advantage 2"],"weaknesses":["weakness 1","weakness 2"]}
-winner should be "my" or "competitor". Include 3-5 advantages and weaknesses.`
-    try {
-      const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
-        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
-      })
-      const aiData = await aiRes.json()
-      if (!aiData.choices || !aiData.choices[0]) throw new Error('AI response invalid: ' + JSON.stringify(aiData))
-      const raw = aiData.choices[0].message.content.trim()
-      const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim()
-      const comparison = JSON.parse(clean)
-      return { comparison }
-    } catch (e) {
-      fastify.log.error(e)
-      return reply.code(500).send({ message: e.message })
-    }
-  })
-}
+  const keys = ['seo', 'performance', 'security', 'bugs']
+
+  function scoreColor(v) {
+    if (v >= 80) return '#059669'
+    if (v >= 50) return '#D97706'
+    return '#DC2626'
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: '1.5rem' }}>
+      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: '1rem' }}>⚔️ Competitor Analysis</div>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+        <input className="form-input" style={{ flex: 1, minWidth: 200 }}
+          placeholder="Meri website: https://mysite.com"
+          value={myUrl} onChange={e => setMyUrl(e.target.value)} />
+        <input className="form-input" style={{ flex: 1, minWidth: 200 }}
+          placeholder="Competitor: https://competitor.com"
+          value={compUrl} onChange={e => setCompUrl(e.target.value)} />
+        <button className="btn btn-primary" onClick={runComparison} disabled={loading || !myUrl || !compUrl}>
+          {loading ? '⏳ Analyzing...' : '⚔️ Compare'}
+        </button>
+      </div>
+
+      {error && <div className="error-card">⚠️ {error}</div>}
+
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)', fontSize: 14 }}>
+          🔍 Dono websites analyze ho rahi hain...
+        </div>
+      )}
+
+      {result && (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+            <div style={{ background: 'var(--bg)', borderRadius: 8, padding: '1rem', border: '2px solid var(--purple)' }}>
+              <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 10, color: 'var(--purple)' }}>
+                🟣 {myUrl.replace('https://','').replace('http://','').split('/')[0]}
+              </div>
+              {keys.map(k => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--muted)' }}>{k}</span>
+                  <span style={{ fontWeight: 700, fontSize: 14, color: scoreColor(result.my.scores[k]) }}>
+                    {result.my.scores[k]}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: 'var(--bg)', borderRadius: 8, padding: '1rem', border: '1px solid var(--border)' }}>
+              <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 10, color: 'var(--muted)' }}>
+                ⚫ {compUrl.replace('https://','').replace('http://','').split('/')[0]}
+              </div>
+              {keys.map(k => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--muted)' }}>{k}</span>
+                  <span style={{ fontWeight: 700, fontSize: 14, color: scoreColor(result.competitor.scores[k]) }}>
+                    {result.competitor.scores[k]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ background: result.winner === 'my' ? '#EAF3DE' : '#FCEBEB', borderRadius: 8, padding: '1rem', marginBottom: 12, textAlign: 'center' }}>
+            <span style={{ fontWeight: 700, fontSize: 14 }}>
+              {result.winner === 'my'
+                ? `🏆 Tumhari website behtar hai! Overall: ${result.my.overall} vs ${result.competitor.overall}`
+                : `⚠️ Competitor aage hai! Overall: ${result.competitor.overall} vs ${result.my.overall}`}
+            </span>
+          </div>
+
+          {result.advantages?.length > 0 && (
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 6, color: '#059669' }}>✅ Tumhari strengths:</div>
+              {result.advantages.map((a, i) => (
+                <div key={i} style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4 }}>• {a}</div>
+              ))}
+            </div>
+          )}
+
+          {result.weaknesses?.length > 0 && (
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 6, color: '#DC2626' }}>❌ Improve karo:</div>
+              {result.weaknesses.map((w, i) => (
+                <div key={i} style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4 }}>• {w}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+} 
