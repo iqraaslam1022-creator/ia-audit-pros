@@ -5,7 +5,6 @@ export default async function auditRoutes(fastify) {
     const { url } = req.body
     const userId = req.user.id
     if (!url) return reply.code(400).send({ message: 'URL zaroori hai' })
-
     const prompt = `You are a professional website SEO and technical auditor. Analyze: ${url}
 Return ONLY raw JSON (no markdown, no backticks, just pure JSON):
 {
@@ -17,57 +16,32 @@ Return ONLY raw JSON (no markdown, no backticks, just pure JSON):
   "summary": "2-3 sentence overview of the website health."
 }
 Include 4-6 real items per category based on ${url}. Use types: critical, warning, info, pass. Scores 0-100.`
-
     try {
       const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          max_tokens: 4000,
-          messages: [{ role: 'user', content: prompt }]
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] })
       })
       const aiData = await aiRes.json()
-
-      if (!aiData.choices || !aiData.choices[0]) {
-        throw new Error('AI response invalid: ' + JSON.stringify(aiData))
-      }
-
+      if (!aiData.choices || !aiData.choices[0]) throw new Error('AI response invalid: ' + JSON.stringify(aiData))
       const raw = aiData.choices[0].message.content.trim()
-      const clean = raw
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/, '')
-        .replace(/```\s*$/, '')
-        .trim()
-
+      const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim()
       const auditResult = JSON.parse(clean)
       if (!auditResult.scores || !auditResult.seo || !auditResult.performance ||
         !auditResult.security || !auditResult.bugs || !auditResult.summary) {
         throw new Error('AI response missing required fields')
       }
-
       auditResult.url = url
       auditResult.date = new Date().toISOString()
-
-      const { data, error } = await fastify.supabase
-        .from('audits')
-        .insert({
-          user_id: userId,
-          url,
-          scores: auditResult.scores,
-          seo: auditResult.seo,
-          performance: auditResult.performance,
-          security: auditResult.security,
-          bugs: auditResult.bugs,
-          summary: auditResult.summary,
-        })
-        .select()
-        .single()
-
+      const { data, error } = await fastify.supabase.from('audits').insert({
+        user_id: userId, url,
+        scores: auditResult.scores,
+        seo: auditResult.seo,
+        performance: auditResult.performance,
+        security: auditResult.security,
+        bugs: auditResult.bugs,
+        summary: auditResult.summary,
+      }).select().single()
       if (error) throw new Error('Supabase error: ' + error.message)
       return { audit: { ...auditResult, id: data.id } }
     } catch (e) {
@@ -82,10 +56,7 @@ Include 4-6 real items per category based on ${url}. Use types: critical, warnin
     try {
       const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           max_tokens: 1000,
@@ -96,8 +67,7 @@ Include 4-6 real items per category based on ${url}. Use types: critical, warnin
         })
       })
       const data = await aiRes.json()
-      const replyText = data.choices[0].message.content
-      return { reply: replyText }
+      return { reply: data.choices[0].message.content }
     } catch (e) {
       return reply.code(500).send({ message: e.message })
     }
@@ -106,56 +76,23 @@ Include 4-6 real items per category based on ${url}. Use types: critical, warnin
   // ─── Competitor Analysis ──────────────────────────────────────────────────────
   fastify.post('/compare', { onRequest: [fastify.authenticate] }, async (req, reply) => {
     const { myUrl, competitorUrl } = req.body
-    if (!myUrl || !competitorUrl) {
-      return reply.code(400).send({ message: 'Dono URLs zaroori hain' })
-    }
-
+    if (!myUrl || !competitorUrl) return reply.code(400).send({ message: 'Dono URLs zaroori hain' })
     const prompt = `You are a professional website auditor. Compare these two websites:
 My website: ${myUrl}
 Competitor website: ${competitorUrl}
-
 Return ONLY raw JSON (no markdown, no backticks):
-{
-  "my": {
-    "scores": {"seo": 75, "performance": 60, "security": 80, "bugs": 70},
-    "overall": 71
-  },
-  "competitor": {
-    "scores": {"seo": 65, "performance": 70, "security": 75, "bugs": 80},
-    "overall": 72
-  },
-  "winner": "my",
-  "advantages": ["Your site loads faster", "Better mobile optimization"],
-  "weaknesses": ["Competitor has better meta descriptions", "Competitor has SSL configured better"]
-}
-winner should be "my" or "competitor" based on overall scores. Include 3-5 advantages and 3-5 weaknesses. Be realistic based on the actual URLs.`
-
+{"my":{"scores":{"seo":75,"performance":60,"security":80,"bugs":70},"overall":71},"competitor":{"scores":{"seo":65,"performance":70,"security":75,"bugs":80},"overall":72},"winner":"my","advantages":["advantage 1","advantage 2"],"weaknesses":["weakness 1","weakness 2"]}
+winner should be "my" or "competitor". Include 3-5 advantages and weaknesses.`
     try {
       const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          max_tokens: 2000,
-          messages: [{ role: 'user', content: prompt }]
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
       })
-
       const aiData = await aiRes.json()
-      if (!aiData.choices || !aiData.choices[0]) {
-        throw new Error('AI response invalid: ' + JSON.stringify(aiData))
-      }
-
+      if (!aiData.choices || !aiData.choices[0]) throw new Error('AI response invalid: ' + JSON.stringify(aiData))
       const raw = aiData.choices[0].message.content.trim()
-      const clean = raw
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/, '')
-        .replace(/```\s*$/, '')
-        .trim()
-
+      const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim()
       const comparison = JSON.parse(clean)
       return { comparison }
     } catch (e) {
@@ -163,4 +100,31 @@ winner should be "my" or "competitor" based on overall scores. Include 3-5 advan
       return reply.code(500).send({ message: e.message })
     }
   })
+
+  // ─── Auto Fix ────────────────────────────────────────────────────────────────
+  fastify.post('/fix', { onRequest: [fastify.authenticate] }, async (req, reply) => {
+    const { title, desc, fix } = req.body
+    if (!title) return reply.code(400).send({ message: 'Issue title zaroori hai' })
+    const prompt = `You are a web developer. A website has this issue:
+Issue: ${title}
+Description: ${desc}
+Suggested fix: ${fix}
+Provide ONLY the ready-to-use code fix (HTML/CSS/JS) with a brief one-line comment. No explanation, just code.`
+    try {
+      const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      })
+      const aiData = await aiRes.json()
+      if (!aiData.choices || !aiData.choices[0]) throw new Error('AI error')
+      return { code: aiData.choices[0].message.content.trim() }
+    } catch (e) {
+      fastify.log.error(e)
+      return reply.code(500).send({ message: e.message })
+    }
+  })
 }
+ 
+ 
+      
