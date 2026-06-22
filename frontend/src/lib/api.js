@@ -35,4 +35,8 @@ export const api = {
   createCheckout: (plan) =>
     request('/api/payment/create-checkout', { method: 'POST', body: JSON.stringify({ plan }) }),
   getPlan: () => request('/api/payment/plan'),
+
+  // Competitor
+  compareCompetitor: (url, competitor_url) =>
+    request('/api/competitor/analyze', { method: 'POST', body: JSON.stringify({ url, competitor_url }) }),
 }
