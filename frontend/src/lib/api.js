@@ -23,6 +23,8 @@ export const api = {
     request('/api/audit/run', { method: 'POST', body: JSON.stringify({ url }) }),
   askAI: (auditId, question, history) =>
     request('/api/audit/ask', { method: 'POST', body: JSON.stringify({ auditId, question, history }) }),
+  compareAudit: (myUrl, competitorUrl) =>
+    request('/api/audit/compare', { method: 'POST', body: JSON.stringify({ myUrl, competitorUrl }) }),  // ✅ YEH ADD KARO
   getHistory: () => request('/api/history'),
   getAudit: (id) => request(`/api/history/${id}`),
 }
