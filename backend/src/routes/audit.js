@@ -43,7 +43,13 @@ Include 4-6 real items per category based on ${url}. Use types: critical, warnin
         summary: auditResult.summary,
       }).select().single()
       if (error) throw new Error('Supabase error: ' + error.message)
-      return { audit: { ...auditResult, id: data.id } }
+      // ✅ Audit Complete Email
+try {
+  await sendAuditEmail(req.user.email, url, auditResult.scores, auditResult.summary)
+} catch (e) {
+  fastify.log.error('Email error:', e)
+}
+ return { audit: { ...auditResult, id: data.id } }
     } catch (e) {
       fastify.log.error(e)
       return reply.code(500).send({ message: e.message })
