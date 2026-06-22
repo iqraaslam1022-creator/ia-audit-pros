@@ -59,8 +59,8 @@ export default function IssueList({ items = [] }) {
                     borderRadius: 8, fontSize: 12, overflowX: 'auto',
                     whiteSpace: 'pre-wrap', wordBreak: 'break-word'
                   }}>
-                    {fixes[i]}
-                  </pre>
+                    {fixes[i].replace(/^```[\w]*\n?/,'').replace(/```$/,'').trim()}
+  </pre>
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     <button
                       className="btn btn-primary"
