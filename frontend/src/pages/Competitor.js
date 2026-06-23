@@ -34,7 +34,7 @@ export default function Competitor() {
     <div className="layout">
       <Navbar />
       <main className="main">
-        <h1 className="page-title">🔍 Competitor Analysis</h1>
+        <h1 className="page-title">Competitor Analysis</h1>
 
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
