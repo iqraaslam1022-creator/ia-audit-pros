@@ -15,7 +15,7 @@ export default function Competitor() {
     setResult(null)
     setLoading(true)
     try {
-      const data = await api.compareCompetitor(myUrl, compUrl)
+      const data = await api.compareAudit(myUrl, compUrl) 
       setResult(data.comparison)
     } catch (e) {
       setError(e.message)
