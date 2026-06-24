@@ -37,6 +37,7 @@ export const api = {
   getPlan: () => request('/api/payment/plan'),
 
   // Competitor
-   compareAudit: (myUrl, competitorUrl) =>
-  request('/api/audit/compare', { method: 'POST', body: JSON.stringify({ myUrl, competitorUrl }) }),
+  compareAudit: (myUrl, competitorUrl) =>
+  request('/api/audit/compare', { method: 'POST', body: JSON.stringify({ url: myUrl, competitor_url: competitorUrl }) }),
+  
 }
