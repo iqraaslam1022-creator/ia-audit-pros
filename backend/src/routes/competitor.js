@@ -54,4 +54,17 @@ Return ONLY valid JSON:
       return reply.code(500).send({ message: e.message })
     }
   })
+  async function analyze() {
+    if (!myUrl || !compUrl) return
+    setError(''); setResult(null); setLoading(true)
+    try {
+      const data = await api.compareAudit(myUrl, compUrl)
+      console.log('RESULT:', JSON.stringify(data)) // ← yeh add karo
+      setResult(data.comparison)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 }
