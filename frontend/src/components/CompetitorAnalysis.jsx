@@ -1,4 +1,4 @@
-import { useState } from 'react'
+ import { useState } from 'react'
 import Navbar from '../components/Navbar'
 import { api } from '../lib/api'
 
@@ -11,11 +11,9 @@ export default function Competitor() {
 
   async function analyze() {
     if (!myUrl || !compUrl) return
-    setError('')
-    setResult(null)
-    setLoading(true)
+    setError(''); setResult(null); setLoading(true)
     try {
-      const data = await api.compareAudit(myUrl, compUrl)
+      const data = await api.compareCompetitor(myUrl, compUrl)
       setResult(data.comparison)
     } catch (e) {
       setError(e.message)
@@ -25,9 +23,9 @@ export default function Competitor() {
   }
 
   function scoreColor(v) {
-    if (v >= 80) return '#3B6D11'
-    if (v >= 50) return '#854F0B'
-    return '#A32D2D'
+    if (v >= 80) return '#22c55e'
+    if (v >= 50) return '#f59e0b'
+    return '#ef4444'
   }
 
   return (
@@ -35,31 +33,21 @@ export default function Competitor() {
       <Navbar />
       <main className="main">
         <h1 className="page-title">Competitor Analysis</h1>
-
-        {/* Input Card */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>My Website</label>
-              <input
-                value={myUrl}
-                onChange={e => setMyUrl(e.target.value)}
-                placeholder="https://mywebsite.com"
-                style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }}
-              />
+              <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 6 }}>My Website</label>
+              <input value={myUrl} onChange={e => setMyUrl(e.target.value)} placeholder="https://mywebsite.com"
+                style={{ width: '100%', padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} />
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Competitor Website</label>
-              <input
-                value={compUrl}
-                onChange={e => setCompUrl(e.target.value)}
-                placeholder="https://competitor.com"
-                style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }}
-              />
+              <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 6 }}>Competitor Website</label>
+              <input value={compUrl} onChange={e => setCompUrl(e.target.value)} placeholder="https://competitor.com"
+                style={{ width: '100%', padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} />
             </div>
           </div>
           <button className="btn btn-primary" onClick={analyze} disabled={loading}>
-            {loading ? 'Analyzing...' : '⚔️ Compare Now'}
+            {loading ? 'Analyzing...' : 'Compare Now'}
           </button>
         </div>
 
@@ -74,59 +62,50 @@ export default function Competitor() {
 
         {result && (
           <div>
-            {/* Winner Banner */}
-            <div className="card" style={{
-              marginBottom: '1rem',
-              background: result.winner === 'my' ? '#EAF3DE' : '#FCEBEB',
-              border: `1px solid ${result.winner === 'my' ? '#3B6D11' : '#A32D2D'}`
-            }}>
-              <p style={{ fontWeight: 700, fontSize: 15, color: result.winner === 'my' ? '#3B6D11' : '#A32D2D', textAlign: 'center' }}>
-                {result.winner === 'my'
-                  ? `🏆 Tumhari website behtar hai! (${result.my?.overall} vs ${result.competitor?.overall})`
-                  : `⚠️ Competitor aage hai! (${result.competitor?.overall} vs ${result.my?.overall})`}
-              </p>
-            </div>
-
-            {/* Score Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-              {[
-                { label: '🟣 My Site', url: myUrl, scores: result.my?.scores || {} },
-                { label: '⚫ Competitor', url: compUrl, scores: result.competitor?.scores || {} }
-              ].map((site, idx) => (
+              {[result.my_site, result.competitor].map((site, idx) => (
                 <div key={idx} className="card">
-                  <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: '0.5rem', color: idx === 0 ? 'var(--purple)' : '#A32D2D' }}>{site.label}</h3>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: '1rem', color: idx === 0 ? 'var(--accent)' : 'var(--red)' }}>
+                    {idx === 0 ? 'My Site' : 'Competitor'}
+                  </h3>
                   <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: '1rem' }}>{site.url}</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: '1rem' }}>
                     {Object.entries(site.scores).map(([key, val]) => (
-                      <div key={key} style={{ background: 'var(--bg)', borderRadius: 8, padding: '8px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                        <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>{key}</div>
-                        <div style={{ fontSize: 24, fontWeight: 700, color: scoreColor(val) }}>{val}</div>
+                      <div key={key} style={{ background: 'var(--bg)', borderRadius: 8, padding: 8, textAlign: 'center' }}>
+                        <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase' }}>{key}</div>
+                        <div style={{ fontSize: 24, fontWeight: 800, color: scoreColor(val) }}>{val}</div>
                       </div>
                     ))}
                   </div>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--green)', marginBottom: 4 }}>Strengths</p>
+                  {site.strengths.map((s, i) => <p key={i} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 2 }}>- {s}</p>)}
+                  <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--red)', marginBottom: 4, marginTop: 8 }}>Weaknesses</p>
+                  {site.weaknesses.map((w, i) => <p key={i} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 2 }}>- {w}</p>)}
                 </div>
               ))}
             </div>
 
-            {/* Advantages */}
-            {result.advantages?.length > 0 && (
-              <div className="card" style={{ marginBottom: '1rem' }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: '#3B6D11' }}>✅ Tumhari Strengths</h3>
-                {result.advantages.map((a, i) => (
-                  <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>• {a}</p>
-                ))}
-              </div>
-            )}
+            <div className="card" style={{ marginBottom: '1rem' }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 8, color: 'var(--accent)' }}>Verdict</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--muted)' }}>{result.verdict}</p>
+            </div>
 
-            {/* Weaknesses */}
-            {result.weaknesses?.length > 0 && (
-              <div className="card" style={{ marginBottom: '1rem' }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: '#A32D2D' }}>❌ Improve Karo</h3>
-                {result.weaknesses.map((w, i) => (
-                  <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>• {w}</p>
-                ))}
-              </div>
-            )}
+            <div className="card">
+              <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Recommendations</h3>
+              {result.recommendations.map((r, i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
+                  <span style={{ background: 'var(--accent)', color: '#000', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
+                  <p style={{ fontSize: 13, color: 'var(--muted)' }}>{r}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!result && !loading && !error && (
+          <div className="empty">
+            <div style={{ fontSize: 40, marginBottom: 12 }}>VS</div>
+            <p>Apni website aur competitor ka URL daalo</p>
           </div>
         )}
       </main>
