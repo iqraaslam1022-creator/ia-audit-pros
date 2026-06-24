@@ -1,3 +1,11 @@
+* {
+  font-family: 'Space Grotesk', -apple-system, sans-serif !important;
+}
+
+h1, h2, h3 {
+  font-family: 'Syne', sans-serif !important;
+}
+
 /* ═══════════════════════════════════════════
    LAYOUT
 ═══════════════════════════════════════════ */
@@ -6,13 +14,6 @@
 /* ═══════════════════════════════════════════
    NAVBAR
 ═══════════════════════════════════════════ */
-* {
-  font-family: 'Space Grotesk', -apple-system, sans-serif !important;
-}
-
-h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
-  font-family: 'Syne', sans-serif !important;
-} 
 .navbar {
   background: #FFFFFF;
   padding: 0 2rem;
@@ -24,10 +25,10 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 1px 12px rgba(91,79,232,0.06);
+  box-shadow: 0 1px 12px rgba(83,74,183,0.06);
 }
 .navbar-logo {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Syne', sans-serif !important;
   font-size: 20px;
   font-weight: 800;
   color: var(--text);
@@ -84,7 +85,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
 .btn-primary:hover {
   background: var(--purple-dark);
   border-color: var(--purple-dark);
-  box-shadow: 0 6px 24px rgba(91,79,232,0.35);
+  box-shadow: 0 6px 24px rgba(83,74,183,0.35);
   transform: translateY(-1px);
 }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
@@ -130,7 +131,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   border-radius: 99px;
   transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
 }
-.step-msg { font-size: 14px; color: var(--muted); }
+.step-msg { font-size: 14px; color: var(--muted); font-family: 'Space Grotesk', sans-serif !important; }
 .prog-pct { font-size: 13px; color: var(--purple); font-weight: 700; }
 
 /* ═══════════════════════════════════════════
@@ -153,6 +154,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   font-weight: 600;
   transition: all 0.2s;
   border-radius: var(--radius) var(--radius) 0 0;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 .tab:hover { color: var(--purple); background: var(--purple-bg); }
 .tab.active {
@@ -185,8 +187,10 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   letter-spacing: 1.2px;
   margin-bottom: 8px;
   font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 .score-num {
+  font-family: 'Syne', sans-serif !important;
   font-size: 38px;
   font-weight: 800;
   letter-spacing: -1px;
@@ -250,6 +254,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
    DASHBOARD
 ═══════════════════════════════════════════ */
 .page-title {
+  font-family: 'Syne', sans-serif !important;
   font-size: 28px;
   font-weight: 800;
   margin-bottom: 1.5rem;
@@ -294,7 +299,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   position: absolute;
   width: 700px;
   height: 700px;
-  background: radial-gradient(circle, rgba(91,79,232,0.07) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(83,74,183,0.07) 0%, transparent 70%);
   top: -200px;
   left: 50%;
   transform: translateX(-50%);
@@ -312,6 +317,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   z-index: 1;
 }
 .landing-logo {
+  font-family: 'Syne', sans-serif !important;
   font-size: 26px;
   font-weight: 800;
   color: var(--text);
@@ -325,6 +331,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   color: var(--muted);
   text-align: center;
   margin-bottom: 2rem;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 
 /* Forms */
@@ -335,6 +342,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   margin-bottom: 6px;
   display: block;
   color: var(--text-2);
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 .form-input {
   width: 100%;
@@ -346,10 +354,11 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   color: var(--text);
   outline: none;
   transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 .form-input:focus {
   border-color: var(--purple);
-  box-shadow: 0 0 0 3px rgba(91,79,232,0.1);
+  box-shadow: 0 0 0 3px rgba(83,74,183,0.1);
   background: white;
 }
 .form-input::placeholder { color: var(--muted); }
@@ -366,10 +375,11 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   box-shadow: var(--shadow-purple);
   transition: all 0.2s;
   letter-spacing: 0.2px;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 .form-btn:hover {
   background: var(--purple-dark);
-  box-shadow: 0 6px 24px rgba(91,79,232,0.35);
+  box-shadow: 0 6px 24px rgba(83,74,183,0.35);
   transform: translateY(-1px);
 }
 .form-switch {
@@ -377,6 +387,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   margin-top: 1.25rem;
   font-size: 13px;
   color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 .form-switch span { color: var(--purple); cursor: pointer; font-weight: 600; }
 .form-switch span:hover { text-decoration: underline; }
@@ -395,7 +406,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
 .ai-section { display: flex; flex-direction: column; gap: 14px; }
 .ai-summary {
   background: var(--purple-light);
-  border: 1px solid rgba(91,79,232,0.15);
+  border: 1px solid rgba(83,74,183,0.15);
   border-radius: var(--radius-lg);
   padding: 1.25rem;
 }
@@ -414,6 +425,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   font-weight: 700;
   color: var(--text-2);
   background: var(--bg-2);
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 .ai-messages {
   padding: 1rem;
@@ -424,7 +436,7 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   flex-direction: column;
   gap: 10px;
 }
-.msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+.msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.6; font-family: 'Space Grotesk', sans-serif !important; }
 .msg-user {
   background: var(--purple);
   color: white;
@@ -455,8 +467,9 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   color: var(--text);
   outline: none;
   transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
-.ai-input-row input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(91,79,232,0.1); }
+.ai-input-row input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(83,74,183,0.1); }
 .ai-input-row input::placeholder { color: var(--muted); }
 
 /* ═══════════════════════════════════════════
@@ -469,4 +482,5 @@ h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
   color: var(--muted);
   border-top: 1px solid var(--border);
   margin-top: auto;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
