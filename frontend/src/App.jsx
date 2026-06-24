@@ -3,19 +3,19 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
 import Audit from './pages/Audit'
-import Competitor from './pages/CompetitorAnalysis'
+import Competitor from './pages/Competitor'
 import Auth from './pages/Auth'
 import './App.css'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: '#fff', background: '#0a0a0a', minHeight: '100vh' }}>Loading...</div>
+  if (loading) return <div style={{ padding: '2rem', textAlign: 'center', minHeight: '100vh' }}>Loading...</div>
   return user ? children : <Navigate to="/auth" replace />
 }
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: '#fff', background: '#0a0a0a', minHeight: '100vh' }}>Loading...</div>
+  if (loading) return <div style={{ padding: '2rem', textAlign: 'center', minHeight: '100vh' }}>Loading...</div>
   return !user ? children : <Navigate to="/dashboard" replace />
 }
 
