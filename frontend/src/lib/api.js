@@ -1,4 +1,4 @@
- const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('token')
@@ -36,7 +36,7 @@ export const api = {
     request('/api/payment/create-checkout', { method: 'POST', body: JSON.stringify({ plan }) }),
   getPlan: () => request('/api/payment/plan'),
 
-  // Competitor — fixed param names to match backend
+  // Competitor — FIXED: correct path + correct param names
   compareAudit: (myUrl, competitorUrl) =>
-    request('/api/audit/compare', { method: 'POST', body: JSON.stringify({ url: myUrl, competitor_url: competitorUrl }) }),
+    request('/api/competitor/analyze', { method: 'POST', body: JSON.stringify({ url: myUrl, competitor_url: competitorUrl }) }),
 }
