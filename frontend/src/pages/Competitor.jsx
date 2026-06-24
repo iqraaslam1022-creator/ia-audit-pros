@@ -16,24 +16,7 @@ export default function Competitor() {
     setLoading(true)
     try {
       const data = await api.compareAudit(myUrl, compUrl)
-      const comp = data.comparison
-
-      // Backend my_site/competitor ko frontend ke liye map karo
-      const myScores = comp.my_site?.scores || {}
-      const compScores = comp.competitor?.scores || {}
-
-      const myTotal = Object.values(myScores).reduce((a, b) => a + b, 0)
-      const compTotal = Object.values(compScores).reduce((a, b) => a + b, 0)
-
-      setResult({
-        my_site: comp.my_site,
-        competitor: comp.competitor,
-        verdict: comp.verdict,
-        recommendations: comp.recommendations || [],
-        myTotal,
-        compTotal,
-        iWin: myTotal >= compTotal
-      })
+      setResult(data.comparison)
     } catch (e) {
       setError(e.message)
     } finally {
@@ -61,7 +44,7 @@ export default function Competitor() {
               <input
                 value={myUrl}
                 onChange={e => setMyUrl(e.target.value)}
-                placeholder="iaatelier.site"
+                placeholder="https://mywebsite.com"
                 style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }}
               />
             </div>
@@ -70,7 +53,7 @@ export default function Competitor() {
               <input
                 value={compUrl}
                 onChange={e => setCompUrl(e.target.value)}
-                placeholder="competitor.com"
+                placeholder="https://competitor.com"
                 style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }}
               />
             </div>
@@ -94,21 +77,21 @@ export default function Competitor() {
             {/* Winner Banner */}
             <div className="card" style={{
               marginBottom: '1rem',
-              background: result.iWin ? '#EAF3DE' : '#FCEBEB',
-              border: `1px solid ${result.iWin ? '#3B6D11' : '#A32D2D'}`
+              background: result.winner === 'my' ? '#EAF3DE' : '#FCEBEB',
+              border: `1px solid ${result.winner === 'my' ? '#3B6D11' : '#A32D2D'}`
             }}>
-              <p style={{ fontWeight: 700, fontSize: 15, color: result.iWin ? '#3B6D11' : '#A32D2D', textAlign: 'center' }}>
-                {result.iWin
-                  ? `🏆 Tumhari website behtar hai! (${result.myTotal} vs ${result.compTotal})`
-                  : `⚠️ Competitor aage hai! (${result.compTotal} vs ${result.myTotal})`}
+              <p style={{ fontWeight: 700, fontSize: 15, color: result.winner === 'my' ? '#3B6D11' : '#A32D2D', textAlign: 'center' }}>
+                {result.winner === 'my'
+                  ? `🏆 Tumhari website behtar hai! (${result.my?.overall} vs ${result.competitor?.overall})`
+                  : `⚠️ Competitor aage hai! (${result.competitor?.overall} vs ${result.my?.overall})`}
               </p>
             </div>
 
             {/* Score Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
               {[
-                { label: '🟣 My Site', url: result.my_site?.url || myUrl, scores: result.my_site?.scores || {} },
-                { label: '⚫ Competitor', url: result.competitor?.url || compUrl, scores: result.competitor?.scores || {} }
+                { label: '🟣 My Site', url: myUrl, scores: result.my?.scores || {} },
+                { label: '⚫ Competitor', url: compUrl, scores: result.competitor?.scores || {} }
               ].map((site, idx) => (
                 <div key={idx} className="card">
                   <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: '0.5rem', color: idx === 0 ? 'var(--purple)' : '#A32D2D' }}>{site.label}</h3>
@@ -125,60 +108,22 @@ export default function Competitor() {
               ))}
             </div>
 
-            {/* Strengths */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-              {result.my_site?.strengths?.length > 0 && (
-                <div className="card">
-                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: '#3B6D11' }}>✅ Meri Strengths</h3>
-                  {result.my_site.strengths.map((s, i) => (
-                    <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>• {s}</p>
-                  ))}
-                </div>
-              )}
-              {result.competitor?.strengths?.length > 0 && (
-                <div className="card">
-                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: '#A32D2D' }}>⚔️ Competitor Strengths</h3>
-                  {result.competitor.strengths.map((s, i) => (
-                    <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>• {s}</p>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Weaknesses */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-              {result.my_site?.weaknesses?.length > 0 && (
-                <div className="card">
-                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: '#854F0B' }}>⚠️ Meri Weaknesses</h3>
-                  {result.my_site.weaknesses.map((w, i) => (
-                    <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>• {w}</p>
-                  ))}
-                </div>
-              )}
-              {result.competitor?.weaknesses?.length > 0 && (
-                <div className="card">
-                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: '#3B6D11' }}>✅ Competitor Weaknesses</h3>
-                  {result.competitor.weaknesses.map((w, i) => (
-                    <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>• {w}</p>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Verdict */}
-            {result.verdict && (
-              <div className="card" style={{ marginBottom: '1rem', background: 'var(--purple-light)', border: '1px solid #c5c2f5' }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, color: 'var(--purple)' }}>📊 Verdict</h3>
-                <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.7 }}>{result.verdict}</p>
+            {/* Advantages */}
+            {result.advantages?.length > 0 && (
+              <div className="card" style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: '#3B6D11' }}>✅ Tumhari Strengths</h3>
+                {result.advantages.map((a, i) => (
+                  <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>• {a}</p>
+                ))}
               </div>
             )}
 
-            {/* Recommendations */}
-            {result.recommendations?.length > 0 && (
-              <div className="card">
-                <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--purple)' }}>💡 Recommendations</h3>
-                {result.recommendations.map((r, i) => (
-                  <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 8, paddingLeft: 12, borderLeft: '3px solid var(--purple)' }}>• {r}</p>
+            {/* Weaknesses */}
+            {result.weaknesses?.length > 0 && (
+              <div className="card" style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: '#A32D2D' }}>❌ Improve Karo</h3>
+                {result.weaknesses.map((w, i) => (
+                  <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>• {w}</p>
                 ))}
               </div>
             )}
