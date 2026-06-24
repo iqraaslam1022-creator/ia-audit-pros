@@ -63,7 +63,10 @@ export default function Competitor() {
         {result && (
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-              {[result.my_site, result.competitor].map((site, idx) => (
+              {[
+  { url: myUrl, scores: result.my.scores, strengths: result.advantages || [], weaknesses: result.weaknesses || [] },
+  { url: compUrl, scores: result.competitor.scores, strengths: [], weaknesses: [] }
+].map((site, idx) => ( 
                 <div key={idx} className="card">
                   <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: '1rem', color: idx === 0 ? 'var(--purple)' : 'var(--red)' }}>{idx === 0 ? '🟣 My Site' : '⚫ Competitor'}</h3>
                   <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: '1rem' }}>{site.url}</p>
