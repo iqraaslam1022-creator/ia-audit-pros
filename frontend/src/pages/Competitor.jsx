@@ -47,7 +47,7 @@ export default function Competitor() {
             </div>
           </div>
           <button className="btn btn-primary" onClick={analyze} disabled={loading}>
-            {loading ? 'Analyzing...' : 'Compare Now'}
+            {loading ? 'Analyzing...' : '⚔️ Compare Now'}
           </button>
         </div>
 
@@ -65,29 +65,29 @@ export default function Competitor() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
               {[result.my_site, result.competitor].map((site, idx) => (
                 <div key={idx} className="card">
-                  <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: '1rem', color: idx === 0 ? 'var(--purple)' : 'var(--red)' }}>{idx === 0 ? 'My Site' : 'Competitor'}</h3>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: '1rem', color: idx === 0 ? 'var(--purple)' : 'var(--red)' }}>{idx === 0 ? '🟣 My Site' : '⚫ Competitor'}</h3>
                   <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: '1rem' }}>{site.url}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: '1rem' }}>
                     {Object.entries(site.scores).map(([key, val]) => (
-                      <div key={key} style={{ background: 'var(--bg)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
-                        <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase' }}>{key}</div>
+                      <div key={key} style={{ background: 'var(--bg-2)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
+                        <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{key}</div>
                         <div style={{ fontSize: 24, fontWeight: 700, color: scoreColor(val) }}>{val}</div>
                       </div>
                     ))}
                   </div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--green)', marginBottom: 4 }}>Strengths</p>
-                  {site.strengths.map((s, i) => <p key={i} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 2 }}>- {s}</p>)}
-                  <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--red)', marginBottom: 4, marginTop: 8 }}>Weaknesses</p>
-                  {site.weaknesses.map((w, i) => <p key={i} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 2 }}>- {w}</p>)}
+                  <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--green)', marginBottom: 4 }}>✅ Strengths</p>
+                  {site.strengths.map((s, i) => <p key={i} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 2 }}>• {s}</p>)}
+                  <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--red)', marginBottom: 4, marginTop: 8 }}>❌ Weaknesses</p>
+                  {site.weaknesses.map((w, i) => <p key={i} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 2 }}>• {w}</p>)}
                 </div>
               ))}
             </div>
             <div className="card" style={{ marginBottom: '1rem', background: 'var(--purple-light)' }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 8, color: 'var(--purple)' }}>Verdict</h3>
+              <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 8, color: 'var(--purple)' }}>🏆 Verdict</h3>
               <p style={{ fontSize: 14, lineHeight: 1.7 }}>{result.verdict}</p>
             </div>
             <div className="card">
-              <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Recommendations</h3>
+              <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>💡 Recommendations</h3>
               {result.recommendations.map((r, i) => (
                 <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
                   <span style={{ background: 'var(--purple)', color: 'white', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, flexShrink: 0 }}>{i + 1}</span>
@@ -98,12 +98,7 @@ export default function Competitor() {
           </div>
         )}
 
-        {!result && !loading && !error && (
-          <div className="empty">
-            <div className="empty-icon">VS</div>
-            <p>Apni website aur competitor ka URL daalo</p>
-          </div>
-        )}
+        {/* ✅ Yeh empty state hata diya — blank rahega */}
       </main>
       <footer className="footer">IA Audit Pro · Powered by Groq AI</footer>
     </div>
