@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
 import Audit from './pages/Audit'
-import Competitor from './pages/CompetitorAnalysis'
+import Competitor from './pages/Competitor'
 import Auth from './pages/Auth'
 import './App.css'
 
