@@ -12,12 +12,14 @@ export default function Navbar() {
       style={{
         background: 'none',
         border: 'none',
-        color: location.pathname === path ? 'white' : 'rgba(255,255,255,0.7)',
+        borderBottom: location.pathname === path ? '2px solid var(--purple)' : '2px solid transparent',
+        color: location.pathname === path ? 'var(--purple)' : 'var(--muted)',
         fontSize: 14,
-        fontWeight: location.pathname === path ? 600 : 400,
+        fontWeight: location.pathname === path ? 700 : 500,
         cursor: 'pointer',
         padding: '4px 8px',
-        borderBottom: location.pathname === path ? '2px solid white' : '2px solid transparent'
+        fontFamily: 'Inter, sans-serif',
+        transition: 'all 0.2s',
       }}
     >{label}</button>
   )
@@ -25,8 +27,12 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-        <div className="navbar-logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-          ⚡ IA Audit Pro
+        <div
+          className="navbar-logo"
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate('/dashboard')}
+        >
+          ⚡ <span>IA</span>AuditPro
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
           {navLink('/dashboard', 'Dashboard')}
