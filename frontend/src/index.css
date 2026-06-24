@@ -1,12 +1,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --purple: #5B4FE8;
-  --purple-dark: #4338CA;
+  --purple: #534AB7;
+  --purple-dark: #3C3489;
   --purple-mid: #7C6FF0;
   --purple-light: #EEEDFE;
   --purple-bg: #F5F4FF;
-
   --bg: #FFFFFF;
   --bg-2: #F8F8FC;
   --bg-3: #F0F0F8;
@@ -14,11 +13,9 @@
   --card-hover: #FAFAFE;
   --border: #E2E2EF;
   --border-dark: #C8C8E0;
-
   --text: #1A1A3E;
   --text-2: #4A4A6A;
   --muted: #6B6B8A;
-
   --green: #3B6D11;
   --green-bg: #EAF3DE;
   --amber: #854F0B;
@@ -27,10 +24,22 @@
   --red-bg: #FCEBEB;
   --blue: #185FA5;
   --blue-bg: #E6F1FB;
-
   --radius: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
+  --shadow: 0 2px 16px rgba(83,74,183,0.08);
+  --shadow-lg: 0 8px 32px rgba(83,74,183,0.12);
+  --shadow-purple: 0 4px 20px rgba(83,74,183,0.25);
+}
 
-  --shadow: 0 2px 16px rgba(91,79,232,0.08);
-  --shadow-lg: 0
+body {
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { cursor: pointer; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; }
+input, textarea { font-family: 'Space Grotesk', sans-serif; }
+a { text-decoration: none; color: inherit; }
