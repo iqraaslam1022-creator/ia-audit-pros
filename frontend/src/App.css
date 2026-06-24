@@ -6,6 +6,13 @@
 /* ═══════════════════════════════════════════
    NAVBAR
 ═══════════════════════════════════════════ */
+* {
+  font-family: 'Space Grotesk', -apple-system, sans-serif !important;
+}
+
+h1, h2, h3, .page-title, .navbar-logo, .score-num, .landing-logo {
+  font-family: 'Syne', sans-serif !important;
+} 
 .navbar {
   background: #FFFFFF;
   padding: 0 2rem;
