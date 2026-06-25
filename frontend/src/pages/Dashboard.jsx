@@ -90,7 +90,7 @@ export default function Dashboard() {
             {[
               { name: 'Free', price: '$0', p: 'free', features: ['3 audits/month', 'Basic SEO check', 'PDF export', 'AI Chat'], popular: false },
               { name: 'Pro', price: '$19', p: 'pro', features: ['Unlimited audits', 'Competitor analysis', 'White-label PDF', 'Email reports', 'Priority support'], popular: true },
-              { name: 'Agency', price: '$49', p: 'agency', features: ['Everything in Pro', '10 team members', 'API access', 'Custom branding', 'Multi-client dashboard'], popular: false },
+              { name: 'Agency', price: '$49', p: 'agency', features: ['Everything in Pro', 'Unlimited Audits', 'Competitor Analysis', 'White-label PDF', 'Priority Support', 'Advanced Reports'], popular: false },
             ].map(({ name, price, p, features, popular }) => (
               <div key={name} className="card" style={{ border: plan === p ? '2px solid var(--purple)' : popular ? '1px solid var(--purple-mid)' : '1px solid var(--border)', position: 'relative' }}>
                 {popular && (
