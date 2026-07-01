@@ -2,6 +2,7 @@ import 'dotenv/config'
 import Fastify from 'fastify'
 import corsPlugin from './plugins/cors.js'
 import supabasePlugin from './plugins/supabase.js'
+import plansPlugin from './plugins/plans.js'
 import authRoutes from './routes/auth.js'
 import auditRoutes from './routes/audit.js'
 import historyRoutes from './routes/history.js'
@@ -12,6 +13,7 @@ const fastify = Fastify({ logger: true })
 
 await fastify.register(corsPlugin)
 await fastify.register(supabasePlugin)
+await fastify.register(plansPlugin)
 
 await fastify.register(import('@fastify/jwt'), {
   secret: process.env.JWT_SECRET || 'changethis'
@@ -36,3 +38,4 @@ fastify.get('/health', async () => ({ status: 'ok' }))
 const port = process.env.PORT || 3001
 await fastify.listen({ port, host: '0.0.0.0' })
 console.log(`Server running on port ${port}`)
+ 
