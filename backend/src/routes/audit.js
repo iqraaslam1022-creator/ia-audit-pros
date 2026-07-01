@@ -260,6 +260,18 @@ export default async function auditRoutes(fastify) {
     const userId = req.user.id
     if (!url) return reply.code(400).send({ message: 'URL zaroori hai' })
 
+    // Free plan wale users ko 3 audits/month tak limit karo
+    const plan = await fastify.getUserPlan(userId)
+    if (plan === 'free') {
+      const usedThisMonth = await fastify.getAuditsThisMonth(userId)
+      if (usedThisMonth >= fastify.FREE_AUDIT_LIMIT_PER_MONTH) {
+        return reply.code(403).send({
+          message: `Aapne is mahine ${fastify.FREE_AUDIT_LIMIT_PER_MONTH} free audits mukammal kar liye hain. Unlimited audits ke liye Pro ya Agency plan lein.`,
+          upgradeRequired: true
+        })
+      }
+    }
+
     try {
       // Fetch real data in parallel
       const [websiteData, pageSpeedData] = await Promise.all([
@@ -300,6 +312,11 @@ export default async function auditRoutes(fastify) {
   // ─── AI Chat ─────────────────────────────────────────────────────────────────
   fastify.post('/ask', { onRequest: [fastify.authenticate] }, async (req, reply) => {
     const { question, history } = req.body
+    const userId = req.user.id
+
+    const gate = await fastify.requirePaidPlan(userId, 'AI Chat')
+    if (gate) return reply.code(403).send(gate)
+
     try {
       const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
