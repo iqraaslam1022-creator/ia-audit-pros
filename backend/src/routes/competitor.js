@@ -1,9 +1,14 @@
 export default async function competitorRoutes(fastify) {
   fastify.post('/analyze', { onRequest: [fastify.authenticate] }, async (req, reply) => {
     const { url, competitor_url } = req.body
+    const userId = req.user.id
     if (!url || !competitor_url) {
       return reply.code(400).send({ message: 'Dono URLs zaroori hain' })
     }
+
+    const gate = await fastify.requirePaidPlan(userId, 'Competitor Analysis')
+    if (gate) return reply.code(403).send(gate)
+
     const prompt = `You are a professional website competitor analyzer.
 Compare these two websites:
 - My Website: ${url}
@@ -55,4 +60,5 @@ Return ONLY valid JSON:
     }
   })
 }
+
 
