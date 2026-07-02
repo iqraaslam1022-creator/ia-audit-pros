@@ -43,8 +43,8 @@ export default function Competitor() {
 
         {!isPaid ? (
           <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-            <p style={{ marginBottom: 12 }}>🔒 Competitor Analysis sirf Pro aur Agency plan mein available hai.</p>
-            <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>Upgrade karein →</button>
+            <p style={{ marginBottom: 12 }}>🔒 Competitor Analysis is only available on the Pro or Agency plan.</p>
+            <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>Upgrade →</button>
           </div>
         ) : (
         <>
@@ -85,8 +85,8 @@ export default function Competitor() {
             }}>
               <p style={{ fontWeight: 700, fontSize: 15, color: myOverall >= compOverall ? '#3B6D11' : '#A32D2D', textAlign: 'center' }}>
                 {myOverall >= compOverall
-                  ? `🏆 Tumhari website behtar hai! (${myOverall} vs ${compOverall})`
-                  : `⚠️ Competitor aage hai! (${compOverall} vs ${myOverall})`}
+                  ? `🏆 Your website is better! (${myOverall} vs ${compOverall})`
+                  : `⚠️ Competitor is ahead! (${compOverall} vs ${myOverall})`}
               </p>
             </div>
 
@@ -156,6 +156,7 @@ export default function Competitor() {
     </div>
   )
 }
+ 
  
 
    
