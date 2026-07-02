@@ -27,7 +27,7 @@ export default function Dashboard() {
     api.getHistory().then(data => setHistory(data.audits || [])).catch(() => {}).finally(() => setLoading(false))
     api.getPlan().then(data => setPlan(data.plan || 'free')).catch(() => {})
 
-    // ✅ Landing page se selected plan check karo
+    // Landing page se selected plan check karo
     const selectedPlan = localStorage.getItem('selectedPlan')
     if (selectedPlan && selectedPlan !== 'free') {
       localStorage.removeItem('selectedPlan')
@@ -49,21 +49,21 @@ export default function Dashboard() {
           <h1 className="page-title" style={{ margin: 0 }}>Dashboard</h1>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             {plan !== 'free' && (
-              
+              <a
                 href="mailto:support@iaauditpro.online?subject=Priority Support Request"
                 className="btn"
                 style={{ border: '1px solid var(--border)', fontSize: 13, textDecoration: 'none' }}
               >
-                💬 Priority Support
+                Priority Support
               </a>
             )}
-              <button className="btn btn-primary" onClick={() => navigate('/audit')}>⚡ New Audit</button>
+            <button className="btn btn-primary" onClick={() => navigate('/audit')}>New Audit</button>
           </div>
         </div>
 
         <div className="tabs" style={{ marginBottom: '1.5rem' }}>
-          <button className={`tab${activeTab === 'history' ? ' active' : ''}`} onClick={() => setActiveTab('history')}>📋 Audit History</button>
-          <button className={`tab${activeTab === 'pricing' ? ' active' : ''}`} onClick={() => setActiveTab('pricing')}>💳 Pricing</button>
+          <button className={`tab${activeTab === 'history' ? ' active' : ''}`} onClick={() => setActiveTab('history')}>Audit History</button>
+          <button className={`tab${activeTab === 'pricing' ? ' active' : ''}`} onClick={() => setActiveTab('pricing')}>Pricing</button>
         </div>
 
         {activeTab === 'history' && (
@@ -106,7 +106,7 @@ export default function Dashboard() {
               <div key={name} className="card" style={{ border: plan === p ? '2px solid var(--purple)' : popular ? '1px solid var(--purple-mid)' : '1px solid var(--border)', position: 'relative' }}>
                 {popular && (
                   <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: 'var(--purple)', color: 'white', padding: '2px 16px', borderRadius: 20, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>
-                    ⭐ MOST POPULAR
+                    MOST POPULAR
                   </div>
                 )}
                 <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>{name}</h3>
