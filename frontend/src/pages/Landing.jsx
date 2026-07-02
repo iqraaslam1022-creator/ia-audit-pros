@@ -111,9 +111,9 @@ export default function Landing() {
         <p style={{ textAlign: 'left', color: '#6b6b8a', marginBottom: '3rem', fontSize: 16 }}>Start free, upgrade when you need more</p>
         <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
           {[
-            { name: 'Free', price: '$0', plan: 'free', features: ['3 audits/month', 'SEO Analysis', 'Performance Check', 'PDF Export', 'AI Chat'], cta: 'Get Started Free', popular: false },
-            { name: 'Pro', price: '$19', plan: 'pro', features: ['Unlimited audits', 'Competitor Analysis', 'White-label PDF', 'Email Reports', 'Priority Support'], cta: 'Start Pro', popular: true },
-            { name: 'Agency', price: '$49', plan: 'agency', features: ['Everything in Pro', 'Unlimited Audits', 'Competitor Analysis', 'White-label PDF', 'Priority Support', 'Advanced Reports'], cta: 'Start Agency', popular: false },
+            { name: 'Free', price: '$0', plan: 'free', features: ['3 audits/month', 'SEO Analysis', 'Performance Check', 'PDF Export'], cta: 'Get Started Free', popular: false },
+            { name: 'Pro', price: '$19', plan: 'pro', features: ['Unlimited audits', 'AI Chat Assistant', 'Competitor Analysis', 'White-label PDF', 'Email Reports', 'Priority Support'], cta: 'Start Pro', popular: true },
+            { name: 'Agency', price: '$49', plan: 'agency', features: ['Everything in Pro', 'Multiple team members', 'Advanced Reports', 'Priority Support'], cta: 'Start Agency', popular: false },
           ].map(({ name, price, plan, features, cta, popular }) => (
             <div key={name} style={{ background: popular ? '#534AB7' : '#fff', border: popular ? 'none' : '1.5px solid #f0f0f8', borderRadius: 16, padding: '2rem', position: 'relative', boxShadow: popular ? '0 20px 50px rgba(83,74,183,0.25)' : 'none' }}>
               {popular && <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#1a1a2e', color: '#fff', padding: '4px 18px', borderRadius: 20, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>MOST POPULAR</div>}
