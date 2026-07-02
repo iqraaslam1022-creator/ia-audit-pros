@@ -70,7 +70,7 @@ export default function Audit() {
         )}
         {auditData && (
           <>
-            <ExportBar data={auditData} />
+            <ExportBar data={auditData} isPaid={isPaid} />
             <ScoreGrid scores={auditData.scores} />
             <div className="tabs">
               {TABS.map((t, i) => (
