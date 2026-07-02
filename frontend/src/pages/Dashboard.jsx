@@ -50,7 +50,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             {plan !== 'free' && (
               <a
-                href="mailto:support@iaauditpro.online?subject=Priority Support Request"
+                href="mailto:iaauditpro@gmail.com?subject=Priority Support Request"
                 className="btn"
                 style={{ border: '1px solid var(--border)', fontSize: 13, textDecoration: 'none' }}
               >
@@ -136,3 +136,4 @@ export default function Dashboard() {
     </div>
   )
 }
+
