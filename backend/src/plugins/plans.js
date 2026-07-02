@@ -36,7 +36,7 @@ export default fp(async (fastify) => {
     const plan = await getUserPlan(userId)
     if (plan === 'free') {
       return {
-        message: `${featureName} sirf Pro ya Agency plan mein available hai. Upgrade karein taake ye feature unlock ho.`,
+        message: `${featureName} is only available on the Pro or Agency plan. Upgrade to unlock this feature.`,
         upgradeRequired: true
       }
     }
