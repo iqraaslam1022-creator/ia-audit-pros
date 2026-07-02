@@ -258,7 +258,7 @@ export default async function auditRoutes(fastify) {
   fastify.post('/run', { onRequest: [fastify.authenticate] }, async (req, reply) => {
     const { url } = req.body
     const userId = req.user.id
-    if (!url) return reply.code(400).send({ message: 'URL zaroori hai' })
+    if (!url) return reply.code(400).send({ message: 'URL is required' })
 
     // Free plan wale users ko 3 audits/month tak limit karo
     const plan = await fastify.getUserPlan(userId)
@@ -266,7 +266,7 @@ export default async function auditRoutes(fastify) {
       const usedThisMonth = await fastify.getAuditsThisMonth(userId)
       if (usedThisMonth >= fastify.FREE_AUDIT_LIMIT_PER_MONTH) {
         return reply.code(403).send({
-          message: `Aapne is mahine ${fastify.FREE_AUDIT_LIMIT_PER_MONTH} free audits mukammal kar liye hain. Unlimited audits ke liye Pro ya Agency plan lein.`,
+          message: `You've used all ${fastify.FREE_AUDIT_LIMIT_PER_MONTH} free audits this month. Upgrade to Pro or Agency for unlimited audits.`,
           upgradeRequired: true
         })
       }
@@ -340,7 +340,7 @@ export default async function auditRoutes(fastify) {
   // ─── Competitor Analysis ──────────────────────────────────────────────────────
   fastify.post('/compare', { onRequest: [fastify.authenticate] }, async (req, reply) => {
     const { myUrl, competitorUrl } = req.body
-    if (!myUrl || !competitorUrl) return reply.code(400).send({ message: 'Dono URLs zaroori hain' })
+    if (!myUrl || !competitorUrl) return reply.code(400).send({ message: 'Both URLs are required' })
 
     try {
       const [myData, compData, myPS, compPS] = await Promise.all([
@@ -397,7 +397,7 @@ export default async function auditRoutes(fastify) {
   // ─── Auto Fix ────────────────────────────────────────────────────────────────
   fastify.post('/fix', { onRequest: [fastify.authenticate] }, async (req, reply) => {
     const { title, desc, fix } = req.body
-    if (!title) return reply.code(400).send({ message: 'Issue title zaroori hai' })
+    if (!title) return reply.code(400).send({ message: 'Issue title is required' })
     const prompt = `You are a web developer. A website has this issue:
 Issue: ${title}
 Description: ${desc}
