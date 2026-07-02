@@ -5,7 +5,7 @@
     const { email, password } = req.body
 
     if (!email || !password)
-      return reply.code(400).send({ message: 'Email aur password zaroori hain' })
+      return reply.code(400).send({ message: 'Email and password are required' })
 
     const { data, error } = await fastify.supabase.auth.admin.createUser({
       email, password, email_confirm: true
@@ -60,7 +60,7 @@
 
     const { data, error } = await fastify.supabase.auth.signInWithPassword({ email, password })
 
-    if (error) return reply.code(401).send({ message: 'Email ya password galat hai' })
+    if (error) return reply.code(401).send({ message: 'Incorrect email or password' })
 
     const token = fastify.jwt.sign({ id: data.user.id, email: data.user.email })
     return { user: { id: data.user.id, email: data.user.email }, token }
