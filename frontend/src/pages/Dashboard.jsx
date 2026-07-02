@@ -72,8 +72,8 @@ export default function Dashboard() {
             {!loading && history.length === 0 && (
               <div className="empty">
                 <div className="empty-icon">📋</div>
-                <p>Koi audit nahi mili abhi tak</p>
-                <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => navigate('/audit')}>Pehla Audit Chalao</button>
+                <p>No audits yet</p>
+                <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => navigate('/audit')}>Run First Audit</button>
               </div>
             )}
             <div className="history-grid">
