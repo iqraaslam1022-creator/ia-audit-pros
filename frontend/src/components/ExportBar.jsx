@@ -1,14 +1,22 @@
 import jsPDF from 'jspdf'
 
-export default function ExportBar({ data }) {
+export default function ExportBar({ data, isPaid }) {
   function exportPDF() {
     const doc = new jsPDF()
     let y = 20
     const line = (txt, size=11, bold=false, color=[0,0,0]) => {
-      if (y > 275) { doc.addPage(); y = 20 }
+      if (y > 275) { doc.addPage(); y = 20; addFooterIfFree() }
       doc.setFontSize(size); doc.setFont('helvetica', bold?'bold':'normal'); doc.setTextColor(...color)
       const lines = doc.splitTextToSize(txt, 170)
       doc.text(lines, 20, y); y += lines.length*(size*0.45)+2
+    }
+    // Free plan: har page pe branding footer — ye "white-label" ko Pro/Agency ka
+    // real selling point banata hai. Paid users ka report clean/unbranded rehta hai.
+    function addFooterIfFree() {
+      if (isPaid) return
+      const pageHeight = doc.internal.pageSize.getHeight()
+      doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(150,150,150)
+      doc.text('Generated with IA Audit Pro (Free) — upgrade for white-label reports', 20, pageHeight - 10)
     }
     line('IA Audit Pro — Report', 18, true)
     line(`URL: ${data.url}`); line(`Date: ${new Date().toLocaleDateString()}`)
@@ -22,7 +30,8 @@ export default function ExportBar({ data }) {
         line(item.desc); line(`Fix: ${item.fix}`, 10, false, [80,80,180]); y+=2
       }); y+=3
     })
-    doc.save(`audit.pdf`)
+    addFooterIfFree()
+    doc.save(isPaid ? `audit-report.pdf` : `audit-report-free.pdf`)
   }
   function exportJSON() {
     const a = document.createElement('a')
