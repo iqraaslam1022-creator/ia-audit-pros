@@ -59,7 +59,7 @@ export default function Auth() {
         </form>
         <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: 13, color: '#6b6b8a' }}>
           {mode === 'login'
-            ? <p>Account nahi hai? <span onClick={() => setMode('signup')} style={{ color: '#534AB7', cursor: 'pointer', fontWeight: 600 }}>Sign up free</span></p>
+            ? <p>Don't have an account? <span onClick={() => setMode('signup')} style={{ color: '#534AB7', cursor: 'pointer', fontWeight: 600 }}>Sign up free</span></p>
             : <p>Already have account? <span onClick={() => setMode('login')} style={{ color: '#534AB7', cursor: 'pointer', fontWeight: 600 }}>Login</span></p>}
         </div>
         <div style={{ textAlign: 'center', marginTop: '1rem' }}>
