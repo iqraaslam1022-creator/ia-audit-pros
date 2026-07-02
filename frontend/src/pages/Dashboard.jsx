@@ -57,7 +57,7 @@ export default function Dashboard() {
                 💬 Priority Support
               </a>
             )}
-            <button className="btn btn-primary" onClick={() => navigate('/audit')}>⚡ New Audit</button>
+              <button className="btn btn-primary" onClick={() => navigate('/audit')}>⚡ New Audit</button>
           </div>
         </div>
 
