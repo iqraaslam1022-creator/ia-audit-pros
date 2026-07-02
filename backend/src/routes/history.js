@@ -11,7 +11,7 @@ export default async function historyRoutes(fastify) {
   fastify.get('/:id', { onRequest: [fastify.authenticate] }, async (req, reply) => {
     const { data, error } = await fastify.supabase.from('audits')
       .select('*').eq('id', req.params.id).eq('user_id', req.user.id).single()
-    if (error) return reply.code(404).send({ message: 'Audit nahi mili' })
+    if (error) return reply.code(404).send({ message: 'Audit not found' })
     return { audit: data }
   })
 }
