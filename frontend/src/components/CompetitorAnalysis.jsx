@@ -74,8 +74,8 @@ export default function CompetitorAnalysis() {
             }}>
               <p style={{ fontWeight: 700, fontSize: 15, color: myOverall >= compOverall ? '#3B6D11' : '#A32D2D', textAlign: 'center' }}>
                 {myOverall >= compOverall
-                  ? `🏆 Tumhari website behtar hai! (${myOverall} vs ${compOverall})`
-                  : `⚠️ Competitor aage hai! (${compOverall} vs ${myOverall})`}
+                  ? `🏆 Your website is better! (${myOverall} vs ${compOverall})`
+                  : `⚠️ Competitor is ahead! (${compOverall} vs ${myOverall})`}
               </p>
             </div>
 
