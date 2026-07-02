@@ -45,10 +45,21 @@ export default function Dashboard() {
     <div className="layout">
       <Navbar />
       <main className="main">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+ <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <h1 className="page-title" style={{ margin: 0 }}>Dashboard</h1>
-          <button className="btn btn-primary" onClick={() => navigate('/audit')}>⚡ New Audit</button>
-        </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            {plan !== 'free' && (
+              
+                href="mailto:support@iaauditpro.online?subject=Priority Support Request"
+                className="btn"
+                style={{ border: '1px solid var(--border)', fontSize: 13, textDecoration: 'none' }}
+              >
+                💬 Priority Support
+              </a>
+            )}
+            <button className="btn btn-primary" onClick={() => navigate('/audit')}>⚡ New Audit</button>
+          </div>
+        </div> 
 
         <div className="tabs" style={{ marginBottom: '1.5rem' }}>
           <button className={`tab${activeTab === 'history' ? ' active' : ''}`} onClick={() => setActiveTab('history')}>📋 Audit History</button>
