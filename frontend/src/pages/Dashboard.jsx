@@ -45,7 +45,7 @@ export default function Dashboard() {
     <div className="layout">
       <Navbar />
       <main className="main">
- <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <h1 className="page-title" style={{ margin: 0 }}>Dashboard</h1>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             {plan !== 'free' && (
@@ -59,7 +59,7 @@ export default function Dashboard() {
             )}
             <button className="btn btn-primary" onClick={() => navigate('/audit')}>⚡ New Audit</button>
           </div>
-        </div> 
+        </div>
 
         <div className="tabs" style={{ marginBottom: '1.5rem' }}>
           <button className={`tab${activeTab === 'history' ? ' active' : ''}`} onClick={() => setActiveTab('history')}>📋 Audit History</button>
@@ -99,9 +99,9 @@ export default function Dashboard() {
         {activeTab === 'pricing' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
             {[
-              { name: 'Free', price: '$0', p: 'free', features: ['3 audits/month', 'Basic SEO check', 'PDF export', 'AI Chat'], popular: false },
-              { name: 'Pro', price: '$19', p: 'pro', features: ['Unlimited audits', 'Competitor analysis', 'White-label PDF','Priority support'], popular: true },
-              { name: 'Agency', price: '$49', p: 'agency', features: ['Everything in Pro', 'Unlimited Audits', 'Competitor Analysis', 'White-label PDF', 'Priority Support', 'Advanced Reports'], popular: false },
+              { name: 'Free', price: '$0', p: 'free', features: ['3 audits/month', 'SEO Analysis', 'Performance Check', 'PDF export'], popular: false },
+              { name: 'Pro', price: '$19', p: 'pro', features: ['Unlimited audits', 'AI Chat Assistant', 'Competitor analysis', 'White-label PDF', 'Priority support'], popular: true },
+              { name: 'Agency', price: '$49', p: 'agency', features: ['Everything in Pro', 'Multiple team members', 'Advanced Reports', 'Priority Support'], popular: false },
             ].map(({ name, price, p, features, popular }) => (
               <div key={name} className="card" style={{ border: plan === p ? '2px solid var(--purple)' : popular ? '1px solid var(--purple-mid)' : '1px solid var(--border)', position: 'relative' }}>
                 {popular && (
