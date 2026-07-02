@@ -63,7 +63,7 @@ export default function Audit() {
             ⚠️ {error}
             {upgradeRequired && (
               <button className="btn btn-primary" style={{ marginLeft: 12 }} onClick={() => navigate('/dashboard')}>
-                Upgrade karein →
+                Upgrade →
               </button>
             )}
           </div>
@@ -86,15 +86,15 @@ export default function Audit() {
                 <AIChat data={auditData} />
               ) : (
                 <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-                  <p style={{ marginBottom: 12 }}>🔒 AI Chat sirf Pro aur Agency plan mein available hai.</p>
-                  <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>Upgrade karein →</button>
+                  <p style={{ marginBottom: 12 }}>🔒 AI Chat is only available on the Pro or Agency plan.</p>
+                  <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>Upgrade →</button>
                 </div>
               )}
             </div>
           </>
         )}
         {!auditData && !loading && !error && (
-          <div className="empty"><div className="empty-icon">🔍</div><p>Website URL enter karo aur audit chalao</p></div>
+          <div className="empty"><div className="empty-icon">🔍</div><p>Enter a website URL and run an audit</p></div>
         )}
       </main>
       <footer className="footer">IA Audit Pro · Powered by Groq AI</footer>
