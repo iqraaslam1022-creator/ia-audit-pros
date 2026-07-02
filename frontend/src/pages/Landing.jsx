@@ -112,7 +112,7 @@ export default function Landing() {
         <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
           {[
             { name: 'Free', price: '$0', plan: 'free', features: ['3 audits/month', 'SEO Analysis', 'Performance Check', 'PDF Export'], cta: 'Get Started Free', popular: false },
-            { name: 'Pro', price: '$19', plan: 'pro', features: ['Unlimited audits', 'AI Chat Assistant', 'Competitor Analysis', 'White-label PDF', 'Email Reports', 'Priority Support'], cta: 'Start Pro', popular: true },
+            { name: 'Pro', price: '$19', plan: 'pro', features: ['Unlimited audits', 'AI Chat Assistant', 'Competitor Analysis', 'White-label PDF', 'Priority Support'], cta: 'Start Pro', popular: true },
             { name: 'Agency', price: '$49', plan: 'agency', features: ['Everything in Pro', 'Multiple team members', 'Advanced Reports', 'Priority Support'], cta: 'Start Agency', popular: false },
           ].map(({ name, price, plan, features, cta, popular }) => (
             <div key={name} style={{ background: popular ? '#534AB7' : '#fff', border: popular ? 'none' : '1.5px solid #f0f0f8', borderRadius: 16, padding: '2rem', position: 'relative', boxShadow: popular ? '0 20px 50px rgba(83,74,183,0.25)' : 'none' }}>
