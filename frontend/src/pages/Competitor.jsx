@@ -1,8 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { api } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
 
 export default function Competitor() {
+  const navigate = useNavigate()
+  const { isPaid } = useAuth()
   const [myUrl, setMyUrl] = useState('')
   const [compUrl, setCompUrl] = useState('')
   const [loading, setLoading] = useState(false)
@@ -37,6 +41,13 @@ export default function Competitor() {
       <main className="main">
         <h1 className="page-title">Competitor Analysis</h1>
 
+        {!isPaid ? (
+          <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+            <p style={{ marginBottom: 12 }}>🔒 Competitor Analysis sirf Pro aur Agency plan mein available hai.</p>
+            <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>Upgrade karein →</button>
+          </div>
+        ) : (
+        <>
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div>
@@ -137,6 +148,8 @@ export default function Competitor() {
               </div>
             )}
           </div>
+        )}
+        </>
         )}
       </main>
       <footer className="footer">IA Audit Pro · Powered by Groq AI</footer>
