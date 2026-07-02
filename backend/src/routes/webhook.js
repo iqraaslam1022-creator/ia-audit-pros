@@ -16,8 +16,8 @@ export default async function webhookRoutes(fastify) {
   fastify.post('/lemonsqueezy', async (req, reply) => {
     const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET
     if (!secret) {
-      fastify.log.error('LEMONSQUEEZY_WEBHOOK_SECRET .env mein set nahi hai')
-      return reply.code(500).send({ message: 'Webhook secret configure nahi hai' })
+      fastify.log.error('LEMONSQUEEZY_WEBHOOK_SECRET is not set in .env')
+      return reply.code(500).send({ message: 'Webhook secret is not configured' })
     }
 
     // ─── Signature verify karo (security ke liye zaroori — warna koi bhi fake payment event bhej sakta hai) ───
