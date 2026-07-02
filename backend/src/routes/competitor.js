@@ -3,7 +3,7 @@ export default async function competitorRoutes(fastify) {
     const { url, competitor_url } = req.body
     const userId = req.user.id
     if (!url || !competitor_url) {
-      return reply.code(400).send({ message: 'Dono URLs zaroori hain' })
+      return reply.code(400).send({ message: 'Both URLs are required' })
     }
 
     const gate = await fastify.requirePaidPlan(userId, 'Competitor Analysis')
