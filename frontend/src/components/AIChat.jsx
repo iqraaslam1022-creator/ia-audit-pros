@@ -1,89 +1,87 @@
-import crypto from 'crypto'
+import { useState, useRef, useEffect } from 'react'
+import { api } from '../lib/api'
 
-// NOTE: Ye route apna khud ka JSON parser use karta hai (raw body ke saath)
-// kyunke Lemon Squeezy signature verify karne ke liye EXACT raw bytes chahiye,
-// Fastify ka default parser JSON parse karke raw bytes discard kar deta hai.
-export default async function webhookRoutes(fastify) {
-  fastify.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
-    req.rawBody = body
-    try {
-      done(null, JSON.parse(body))
-    } catch (err) {
-      done(err)
-    }
-  })
+export default function AIChat({ data }) {
+  const [messages, setMessages] = useState([])
+  const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
+  const messagesEndRef = useRef(null)
 
-  fastify.post('/lemonsqueezy', async (req, reply) => {
-    const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET
-    if (!secret) {
-      fastify.log.error('LEMONSQUEEZY_WEBHOOK_SECRET is not set in .env')
-      return reply.code(500).send({ message: 'Webhook secret is not configured' })
-    }
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
-    // ─── Signature verify karo (security ke liye zaroori — warna koi bhi fake payment event bhej sakta hai) ───
-    const signature = req.headers['x-signature'] || ''
-    const digest = crypto.createHmac('sha256', secret).update(req.rawBody).digest('hex')
+  async function sendMessage() {
+    const question = input.trim()
+    if (!question || sending) return
 
-    const sigBuf = Buffer.from(signature, 'utf8')
-    const digestBuf = Buffer.from(digest, 'utf8')
-    if (sigBuf.length !== digestBuf.length || !crypto.timingSafeEqual(sigBuf, digestBuf)) {
-      fastify.log.warn('Lemon Squeezy webhook: invalid signature')
-      return reply.code(401).send({ message: 'Invalid signature' })
-    }
-
-    const event = req.body
-    const eventName = event?.meta?.event_name
-    const userId = event?.meta?.custom_data?.userId
-
-    if (!userId) {
-      fastify.log.warn('Lemon Squeezy webhook: custom_data.userId missing, skipping')
-      return reply.code(200).send({ received: true })
-    }
-
-    const variantId = String(
-      event?.data?.attributes?.variant_id ||
-      event?.data?.attributes?.first_subscription_item?.variant_id || ''
-    )
-
-    const planMap = {
-      [process.env.LEMONSQUEEZY_PRO_VARIANT_ID]: 'pro',
-      [process.env.LEMONSQUEEZY_AGENCY_VARIANT_ID]: 'agency'
-    }
+    setError('')
+    const userMsg = { role: 'user', content: question }
+    const nextMessages = [...messages, userMsg]
+    setMessages(nextMessages)
+    setInput('')
+    setSending(true)
 
     try {
-      // Subscription active ho gayi — plan upgrade karo
-      if (['subscription_created', 'subscription_updated', 'subscription_resumed', 'subscription_unpaused'].includes(eventName)) {
-        const status = event?.data?.attributes?.status
-        const isActive = status === 'active' || status === 'on_trial'
-        const plan = isActive ? (planMap[variantId] || 'pro') : 'free'
-
-        const { error } = await fastify.supabase.from('user_plans').upsert({
-          user_id: userId,
-          plan,
-          lemonsqueezy_subscription_id: event?.data?.id || null,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' })
-
-        if (error) throw new Error('Supabase upsert error: ' + error.message)
-        fastify.log.info(`User ${userId} ka plan '${plan}' set ho gaya (event: ${eventName})`)
-      }
-
-      // Subscription cancel/expire ho gayi — wapis free pe daalo
-      if (['subscription_cancelled', 'subscription_expired', 'subscription_paused'].includes(eventName)) {
-        const { error } = await fastify.supabase.from('user_plans').upsert({
-          user_id: userId,
-          plan: 'free',
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' })
-
-        if (error) throw new Error('Supabase upsert error: ' + error.message)
-        fastify.log.info(`User ${userId} ka plan 'free' pe wapis aa gaya (event: ${eventName})`)
-      }
+      const history = nextMessages.map(m => ({ role: m.role, content: m.content }))
+      const res = await api.askAI(data?.id, question, history)
+      setMessages(prev => [...prev, { role: 'assistant', content: res.reply }])
     } catch (e) {
-      fastify.log.error(e)
-      return reply.code(500).send({ message: e.message })
+      setError(e.message || 'Something went wrong. Please try again.')
+    } finally {
+      setSending(false)
     }
+  }
 
-    return reply.code(200).send({ received: true })
-  })
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage()
+    }
+  }
+
+  return (
+    <div className="ai-section">
+      {data?.summary && (
+        <div className="ai-summary">
+          <h3>Audit Summary</h3>
+          <p>{data.summary}</p>
+        </div>
+      )}
+
+      <div className="ai-chatbox">
+        <div className="ai-chatbox-header">Ask the AI about your audit</div>
+        <div className="ai-messages">
+          {messages.length === 0 && (
+            <p style={{ fontSize: 13, color: 'var(--muted)' }}>
+              Ask questions like "How do I fix the missing meta description?" or "What should I prioritize first?"
+            </p>
+          )}
+          {messages.map((m, i) => (
+            <div key={i} className={`msg ${m.role === 'user' ? 'msg-user' : 'msg-ai'}`}>
+              {m.content}
+            </div>
+          ))}
+          {sending && <div className="msg msg-ai">Thinking...</div>}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className="ai-input-row">
+          <input
+            type="text"
+            placeholder="Type your question..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={sending}
+          />
+          <button className="btn btn-primary" onClick={sendMessage} disabled={sending || !input.trim()}>
+            Send
+          </button>
+        </div>
+      </div>
+
+      {error && <p style={{ color: 'var(--danger, #e5484d)', fontSize: 13 }}>⚠️ {error}</p>}
+    </div>
+  )
 }

@@ -24,8 +24,8 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    api.getHistory().then(data => setHistory(data.audits || [])).catch(() => {}).finally(() => setLoading(false))
-    api.getPlan().then(data => setPlan(data.plan || 'free')).catch(() => {})
+    api.getHistory().then(data => setHistory(data.audits || [])).catch(() => { }).finally(() => setLoading(false))
+    api.getPlan().then(data => setPlan(data.plan || 'free')).catch(() => { })
 
     // Landing page se selected plan check karo
     const selectedPlan = localStorage.getItem('selectedPlan')
@@ -45,9 +45,9 @@ export default function Dashboard() {
     <div className="layout">
       <Navbar />
       <main className="main">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
           <h1 className="page-title" style={{ margin: 0 }}>Dashboard</h1>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             {plan !== 'free' && (
               <a
                 href="mailto:iaauditpro@gmail.com?subject=Priority Support Request"
@@ -97,7 +97,7 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'pricing' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+          <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
             {[
               { name: 'Free', price: '$0', p: 'free', features: ['3 audits/month', 'SEO Analysis', 'Performance Check', 'PDF export'], popular: false },
               { name: 'Pro', price: '$19', p: 'pro', features: ['Unlimited audits', 'AI Chat Assistant', 'Competitor analysis', 'White-label PDF', 'Priority support'], popular: true },

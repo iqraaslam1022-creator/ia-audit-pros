@@ -26,7 +26,7 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+      <div className="navbar-left">
         <div
           className="navbar-logo"
           style={{ cursor: 'pointer' }}
@@ -34,7 +34,7 @@ export default function Navbar() {
         >
           ⚡ <span>IA</span>AuditPro
         </div>
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div className="navbar-links">
           {navLink('/dashboard', 'Dashboard')}
           {navLink('/audit', 'New Audit')}
           {navLink('/competitor', 'Competitor')}

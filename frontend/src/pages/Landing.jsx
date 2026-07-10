@@ -1,4 +1,4 @@
- import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -19,18 +19,25 @@ export default function Landing() {
           .hero-title { font-size: 38px !important; }
           .grid-3 { grid-template-columns: 1fr !important; }
           .grid-4 { grid-template-columns: repeat(2,1fr) !important; }
-          .nav-links { display: none !important; }
+          .nav-anchor-links { display: none !important; }
+          nav { padding: 1rem 1.25rem !important; }
+        }
+        @media (max-width: 480px) {
+          .hero-title { font-size: 30px !important; }
+          section { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
         }
       `}</style>
 
       <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.1rem 2.5rem', borderBottom: '1px solid #f0f0f8', position: 'sticky', top: 0, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', zIndex: 100 }}>
         <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 800, color: '#534AB7', letterSpacing: '-0.5px' }}>IA<span style={{ color: '#1a1a2e' }}>Audit</span><span style={{ color: '#534AB7' }}>Pro</span></div>
-        <div className="nav-links" style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
-          <a href="#features" style={{ color: '#6b6b8a', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Features</a>
-          <a href="#pricing" style={{ color: '#6b6b8a', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Pricing</a>
-          <a href="#faq" style={{ color: '#6b6b8a', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>FAQ</a>
-          <button onClick={() => navigate('/auth')} style={{ background: 'none', border: '1.5px solid #534AB7', color: '#534AB7', padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Login</button>
-          <button onClick={() => navigate('/auth')} className="btn-hover" style={{ background: '#534AB7', border: 'none', color: '#fff', padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 15px rgba(83,74,183,0.25)', transition: 'all 0.2s' }}>Get Started Free</button>
+        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+          <div className="nav-anchor-links" style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
+            <a href="#features" style={{ color: '#6b6b8a', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Features</a>
+            <a href="#pricing" style={{ color: '#6b6b8a', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Pricing</a>
+            <a href="#faq" style={{ color: '#6b6b8a', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>FAQ</a>
+          </div>
+          <button onClick={() => navigate('/auth')} style={{ background: 'none', border: '1.5px solid #534AB7', color: '#534AB7', padding: '8px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>Login</button>
+          <button onClick={() => navigate('/auth')} className="btn-hover" style={{ background: '#534AB7', border: 'none', color: '#fff', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 15px rgba(83,74,183,0.25)', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>Get Started Free</button>
         </div>
       </nav>
 
@@ -201,4 +208,3 @@ export default function Landing() {
     </div>
   )
 }
-          

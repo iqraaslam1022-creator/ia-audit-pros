@@ -37,8 +37,8 @@ export default function Auth() {
   }
 
   return (
-    <div className="landing-auth">
-      <div className="auth-box">
+    <div className="landing">
+      <div className="landing-box">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ fontSize: 24, fontWeight: 800, color: '#534AB7', marginBottom: 6 }}>IA Audit Pro</div>
           <div style={{ fontSize: 14, color: '#6b6b8a' }}>{mode === 'login' ? 'Welcome back!' : 'Create your free account'}</div>
