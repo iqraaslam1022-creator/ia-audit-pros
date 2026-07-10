@@ -41,6 +41,7 @@ h3 {
   align-items: center;
   gap: 24px;
   min-width: 0;
+  flex: 1;
 }
 
 .navbar-links {
@@ -48,6 +49,8 @@ h3 {
   gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .navbar-links::-webkit-scrollbar {

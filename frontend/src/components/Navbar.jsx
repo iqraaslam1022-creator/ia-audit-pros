@@ -20,6 +20,8 @@ export default function Navbar() {
         padding: '4px 8px',
         fontFamily: 'Inter, sans-serif',
         transition: 'all 0.2s',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
       }}
     >{label}</button>
   )
@@ -47,3 +49,4 @@ export default function Navbar() {
     </nav>
   )
 }
+
