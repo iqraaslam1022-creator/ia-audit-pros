@@ -26,6 +26,19 @@ export default function Audit() {
 
   const sleep = ms => new Promise(r => setTimeout(r, ms))
 
+  async function handleUpgrade() {
+    try {
+      const res = await api.createCheckout('pro')
+      if (res.url) {
+        window.location.href = res.url
+      } else {
+        alert('Error: No checkout URL')
+      }
+    } catch (e) {
+      alert('Error: ' + e.message)
+    }
+  }
+
   async function runAudit(url) {
     setError(''); setUpgradeRequired(false); setAuditData(null); setLoading(true); setProgress(0); setActiveTab(0)
     for (let i = 0; i < STEPS.length; i++) {
@@ -62,7 +75,7 @@ export default function Audit() {
           <div className="error-card">
             ⚠️ {error}
             {upgradeRequired && (
-              <button className="btn btn-primary" style={{ marginLeft: 12 }} onClick={() => navigate('/dashboard')}>
+              <button className="btn btn-primary" style={{ marginLeft: 12 }} onClick={handleUpgrade}>
                 Upgrade →
               </button>
             )}
@@ -87,7 +100,7 @@ export default function Audit() {
               ) : (
                 <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
                   <p style={{ marginBottom: 12 }}>🔒 AI Chat is only available on the Pro or Agency plan.</p>
-                  <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>Upgrade →</button>
+                  <button className="btn btn-primary" onClick={handleUpgrade}>Upgrade →</button>
                 </div>
               )}
             </div>
@@ -101,5 +114,5 @@ export default function Audit() {
     </div>
   )
 }
- 
- 
+
+
