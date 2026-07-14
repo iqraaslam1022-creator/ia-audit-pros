@@ -1,174 +1,223 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import { api } from '../lib/api'
-import { useAuth } from '../context/AuthContext'
+export default async function competitorRoutes(fastify) {
 
-export default function Competitor() {
-  const navigate = useNavigate()
-  const { isPaid } = useAuth()
-  const [myUrl, setMyUrl] = useState('')
-  const [compUrl, setCompUrl] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState(null)
-  const [error, setError] = useState('')
-
-  async function analyze() {
-    if (!myUrl || !compUrl) return
-    setError(''); setResult(null); setLoading(true)
+  // ─── Helper: Fetch Real Website Data ─────────────────────────────────────────
+  async function fetchWebsiteData(url) {
     try {
-      const data = await api.compareAudit(myUrl, compUrl)
-      setResult(data.comparison)
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; IAuditBot/1.0)' },
+        signal: AbortSignal.timeout(10000)
+      })
+      const html = await res.text()
+      const headers = Object.fromEntries(res.headers.entries())
+      return { html, headers, status: res.status, ok: res.ok }
     } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
+      return { html: '', headers: {}, status: 0, ok: false, error: e.message }
     }
   }
 
-  async function handleUpgrade() {
+  // ─── Helper: Parse HTML for SEO Data ─────────────────────────────────────────
+  function parseHTML(html, url) {
+    const get = (regex) => { const m = html.match(regex); return m ? m[1] : null }
+    const getAll = (regex) => { const m = html.match(regex); return m || [] }
+
+    const title = get(/<title[^>]*>([^<]+)<\/title>/i)
+    const metaDesc = get(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i)
+    const metaViewport = get(/<meta[^>]*name=["']viewport["'][^>]*content=["']([^"']+)["']/i)
+    const canonical = get(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["']/i)
+    const h1Tags = getAll(/<h1[^>]*>[^<]+<\/h1>/gi)
+    const h2Tags = getAll(/<h2[^>]*>[^<]+<\/h2>/gi)
+    const imgTags = getAll(/<img[^>]+>/gi)
+    const imgNoAlt = imgTags.filter(img => !img.match(/alt=["'][^"']+["']/i))
+    const links = getAll(/href=["']([^"'#]+)["']/gi)
+    const brokenLinks = links.filter(l => l.includes('undefined') || l.includes('null'))
+    const hasRobots = html.includes('robots') || html.includes('noindex')
+    const hasSitemap = html.includes('sitemap')
+    const hasSchema = html.includes('application/ld+json') || html.includes('schema.org')
+    const hasOG = html.includes('og:title') || html.includes('og:description')
+    const isHTTPS = url.startsWith('https')
+
+    return {
+      title, metaDesc, metaViewport, canonical,
+      h1Count: h1Tags.length, h2Count: h2Tags.length,
+      imgTotal: imgTags.length, imgNoAlt: imgNoAlt.length,
+      hasRobots, hasSitemap, hasSchema, hasOG, isHTTPS,
+      brokenLinks: brokenLinks.length
+    }
+  }
+
+  // ─── Helper: Check Security Headers ──────────────────────────────────────────
+  function checkSecurity(headers, isHTTPS) {
+    return {
+      https: isHTTPS,
+      hsts: !!headers['strict-transport-security'],
+      xframe: !!headers['x-frame-options'],
+      xcontent: !!headers['x-content-type-options'],
+      csp: !!headers['content-security-policy'],
+    }
+  }
+
+  // ─── Helper: Get PageSpeed Data ───────────────────────────────────────────────
+  async function getPageSpeed(url) {
     try {
-      const res = await api.createCheckout('pro')
-      if (res.url) {
-        window.location.href = res.url
-      } else {
-        alert('Error: No checkout URL')
+      const apiKey = process.env.PAGESPEED_API_KEY
+      const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${apiKey}&strategy=mobile&category=performance&category=seo&category=accessibility&category=best-practices`
+      const res = await fetch(apiUrl, { signal: AbortSignal.timeout(30000) })
+      const data = await res.json()
+      if (data.error) return null
+
+      const cats = data.lighthouseResult?.categories || {}
+      return {
+        performance: Math.round((cats.performance?.score || 0) * 100),
+        seo: Math.round((cats.seo?.score || 0) * 100),
+        accessibility: Math.round((cats.accessibility?.score || 0) * 100),
+        bestPractices: Math.round((cats['best-practices']?.score || 0) * 100),
       }
     } catch (e) {
-      alert('Error: ' + e.message)
+      return null
     }
   }
 
-  function scoreColor(v) {
-    if (v >= 80) return '#3B6D11'
-    if (v >= 50) return '#854F0B'
-    return '#A32D2D'
+  // ─── Helper: Score a Site (SEO / Performance / Security / Bugs) ─────────────
+  function scoreSite(seo, security, ps) {
+    let seoScore = 100
+    if (!seo.title) seoScore -= 20
+    else if (seo.title.length < 30 || seo.title.length > 60) seoScore -= 10
+    if (!seo.metaDesc) seoScore -= 20
+    if (seo.h1Count === 0) seoScore -= 20
+    else if (seo.h1Count > 1) seoScore -= 10
+    if (seo.imgNoAlt > 0) seoScore -= 10
+    if (!seo.canonical) seoScore -= 10
+    if (!seo.hasOG) seoScore -= 5
+    seoScore = Math.max(0, Math.min(100, seoScore))
+    if (ps) seoScore = Math.round((seoScore + ps.seo) / 2)
+
+    const perfScore = ps ? ps.performance : 50
+
+    let secScore = 100
+    if (!security.https) secScore -= 30
+    if (!security.hsts) secScore -= 15
+    if (!security.xframe) secScore -= 15
+    if (!security.xcontent) secScore -= 15
+    if (!security.csp) secScore -= 15
+    secScore = Math.max(0, Math.min(100, secScore))
+
+    let bugScore = 100
+    if (!seo.metaViewport) bugScore -= 25
+    if (!seo.hasSchema) bugScore -= 10
+    if (!seo.hasSitemap) bugScore -= 10
+    if (seo.brokenLinks > 0) bugScore -= 15
+    bugScore = Math.max(0, Math.min(100, bugScore))
+
+    return { seo: seoScore, performance: perfScore, security: secScore, bugs: bugScore }
   }
 
-  const myOverall = result ? Math.round(Object.values(result.my_site?.scores || {}).reduce((a, b) => a + b, 0) / 4) : 0
-  const compOverall = result ? Math.round(Object.values(result.competitor?.scores || {}).reduce((a, b) => a + b, 0) / 4) : 0
+  function buildStrengthsWeaknesses(seo, security, ps) {
+    const strengths = []
+    const weaknesses = []
 
-  return (
-    <div className="layout">
-      <Navbar />
-      <main className="main">
-        <h1 className="page-title">Competitor Analysis</h1>
+    if (seo.title && seo.title.length >= 30 && seo.title.length <= 60) strengths.push('Well optimized title tag')
+    else weaknesses.push('Title tag missing or poorly sized')
 
-        {!isPaid ? (
-          <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-            <p style={{ marginBottom: 12 }}>🔒 Competitor Analysis is only available on the Pro or Agency plan.</p>
-            <button className="btn btn-primary" onClick={handleUpgrade}>Upgrade →</button>
-          </div>
-        ) : (
-          <>
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-              <div className="competitor-input-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                <div>
-                  <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>My Website</label>
-                  <input value={myUrl} onChange={e => setMyUrl(e.target.value)} placeholder="https://mywebsite.com"
-                    style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Competitor Website</label>
-                  <input value={compUrl} onChange={e => setCompUrl(e.target.value)} placeholder="https://competitor.com"
-                    style={{ width: '100%', padding: '10px 14px', border: '1.5px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 14, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} />
-                </div>
-              </div>
-              <button className="btn btn-primary" onClick={analyze} disabled={loading}>
-                {loading ? 'Analyzing...' : '⚔️ Compare Now'}
-              </button>
-            </div>
+    if (seo.metaDesc) strengths.push('Has a meta description')
+    else weaknesses.push('Missing meta description')
 
-            {error && <div className="error-card">{error}</div>}
+    if (seo.h1Count === 1) strengths.push('Exactly one H1 tag')
+    else weaknesses.push(seo.h1Count === 0 ? 'No H1 tag found' : 'Multiple H1 tags found')
 
-            {loading && (
-              <div className="loading-card">
-                <p className="step-msg">Comparing websites...</p>
-                <div className="prog-track"><div className="prog-fill" style={{ width: '60%' }} /></div>
-              </div>
-            )}
+    if (seo.imgNoAlt === 0 && seo.imgTotal > 0) strengths.push('All images have alt text')
+    else if (seo.imgNoAlt > 0) weaknesses.push(`${seo.imgNoAlt} images missing alt text`)
 
-            {result && (
-              <div>
-                {/* Winner Banner */}
-                <div className="card" style={{
-                  marginBottom: '1rem',
-                  background: myOverall >= compOverall ? '#EAF3DE' : '#FCEBEB',
-                  border: `1px solid ${myOverall >= compOverall ? '#3B6D11' : '#A32D2D'}`
-                }}>
-                  <p style={{ fontWeight: 700, fontSize: 15, color: myOverall >= compOverall ? '#3B6D11' : '#A32D2D', textAlign: 'center' }}>
-                    {myOverall >= compOverall
-                      ? `🏆 Your website is better! (${myOverall} vs ${compOverall})`
-                      : `⚠️ Competitor is ahead! (${compOverall} vs ${myOverall})`}
-                  </p>
-                </div>
+    if (security.https) strengths.push('Uses HTTPS')
+    else weaknesses.push('Not using HTTPS')
 
-                {/* Score Cards */}
-                <div className="competitor-score-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                  {[
-                    {
-                      label: '🟣 My Site',
-                      url: result.my_site?.url || myUrl,
-                      scores: result.my_site?.scores || {},
-                      strengths: result.my_site?.strengths || [],
-                      weaknesses: result.my_site?.weaknesses || []
-                    },
-                    {
-                      label: '⚫ Competitor',
-                      url: result.competitor?.url || compUrl,
-                      scores: result.competitor?.scores || {},
-                      strengths: result.competitor?.strengths || [],
-                      weaknesses: result.competitor?.weaknesses || []
-                    }
-                  ].map((site, idx) => (
-                    <div key={idx} className="card">
-                      <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: '0.5rem', color: idx === 0 ? 'var(--purple)' : '#A32D2D' }}>{site.label}</h3>
-                      <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: '1rem' }}>{site.url}</p>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: '1rem' }}>
-                        {Object.entries(site.scores).map(([key, val]) => (
-                          <div key={key} style={{ background: 'var(--bg)', borderRadius: 8, padding: '8px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                            <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>{key}</div>
-                            <div style={{ fontSize: 24, fontWeight: 700, color: scoreColor(val) }}>{val}</div>
-                          </div>
-                        ))}
-                      </div>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: '#3B6D11', marginBottom: 4 }}>✅ Strengths</p>
-                      {site.strengths.map((s, i) => <p key={i} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 2 }}>• {s}</p>)}
-                      <p style={{ fontSize: 12, fontWeight: 600, color: '#A32D2D', marginBottom: 4, marginTop: 8 }}>❌ Weaknesses</p>
-                      {site.weaknesses.map((w, i) => <p key={i} style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 2 }}>• {w}</p>)}
-                    </div>
-                  ))}
-                </div>
+    if (security.csp) strengths.push('Has a Content Security Policy')
+    else weaknesses.push('Missing Content Security Policy header')
 
-                {/* Verdict */}
-                {result.verdict && (
-                  <div className="card" style={{ marginBottom: '1rem', background: 'var(--purple-light)' }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, color: 'var(--purple)' }}>🏆 Verdict</h3>
-                    <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text-2)' }}>{result.verdict}</p>
-                  </div>
-                )}
+    if (seo.hasSchema) strengths.push('Has structured data (Schema.org)')
+    else weaknesses.push('No structured data found')
 
-                {/* Recommendations */}
-                {result.recommendations?.length > 0 && (
-                  <div className="card">
-                    <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>💡 Recommendations</h3>
-                    {result.recommendations.map((r, i) => (
-                      <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
-                        <span style={{ background: 'var(--purple)', color: 'white', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, flexShrink: 0 }}>{i + 1}</span>
-                        <p style={{ fontSize: 13, color: 'var(--text)' }}>{r}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </main>
-      <footer className="footer">IA Audit Pro · Powered by Groq AI</footer>
-    </div>
-  )
+    if (ps && ps.performance >= 80) strengths.push('Strong PageSpeed performance score')
+    else if (ps && ps.performance < 50) weaknesses.push('Poor PageSpeed performance score')
+
+    return { strengths: strengths.slice(0, 5), weaknesses: weaknesses.slice(0, 5) }
+  }
+
+  // ─── Competitor Analysis ──────────────────────────────────────────────────────
+  fastify.post('/analyze', { onRequest: [fastify.authenticate] }, async (req, reply) => {
+    const { url, competitor_url } = req.body
+    const userId = req.user.id
+    if (!url || !competitor_url) return reply.code(400).send({ message: 'Both URLs are required' })
+
+    const gate = await fastify.requirePaidPlan(userId, 'Competitor Analysis')
+    if (gate) return reply.code(403).send(gate)
+
+    try {
+      const [myData, compData, myPS, compPS] = await Promise.all([
+        fetchWebsiteData(url),
+        fetchWebsiteData(competitor_url),
+        getPageSpeed(url),
+        getPageSpeed(competitor_url)
+      ])
+
+      const mySEO = parseHTML(myData.html, url)
+      const compSEO = parseHTML(compData.html, competitor_url)
+      const mySec = checkSecurity(myData.headers, mySEO.isHTTPS)
+      const compSec = checkSecurity(compData.headers, compSEO.isHTTPS)
+
+      const myScores = scoreSite(mySEO, mySec, myPS)
+      const compScores = scoreSite(compSEO, compSec, compPS)
+
+      const my = { url, scores: myScores, ...buildStrengthsWeaknesses(mySEO, mySec, myPS) }
+      const competitor = { url: competitor_url, scores: compScores, ...buildStrengthsWeaknesses(compSEO, compSec, compPS) }
+
+      const myOverall = Math.round(Object.values(myScores).reduce((a, b) => a + b, 0) / 4)
+      const compOverall = Math.round(Object.values(compScores).reduce((a, b) => a + b, 0) / 4)
+
+      let verdict = myOverall >= compOverall
+        ? `${url} outperforms ${competitor_url} overall (${myOverall} vs ${compOverall}), but check individual categories below for areas to keep improving.`
+        : `${competitor_url} currently outperforms ${url} overall (${compOverall} vs ${myOverall}). Focus on the weaknesses below to close the gap.`
+
+      const recommendations = [...my.weaknesses.slice(0, 3), ...competitor.strengths.filter(s => !my.strengths.includes(s)).slice(0, 2)]
+
+      // Optional: refine verdict/recommendations with AI if key is available
+      try {
+        if (process.env.GROQ_API_KEY) {
+          const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
+            body: JSON.stringify({
+              model: 'llama-3.3-70b-versatile',
+              max_tokens: 500,
+              messages: [
+                { role: 'system', content: 'You are a website audit expert. Reply ONLY with valid JSON: {"verdict": string, "recommendations": string[]}. Keep verdict to 2 sentences and give up to 5 short, actionable recommendations.' },
+                { role: 'user', content: `My site (${url}) scores: ${JSON.stringify(myScores)}. Competitor (${competitor_url}) scores: ${JSON.stringify(compScores)}. My strengths: ${my.strengths.join(', ')}. My weaknesses: ${my.weaknesses.join(', ')}. Competitor strengths: ${competitor.strengths.join(', ')}.` }
+              ]
+            })
+          })
+          const aiData = await aiRes.json()
+          const parsed = JSON.parse(aiData.choices[0].message.content)
+          if (parsed.verdict) verdict = parsed.verdict
+          if (Array.isArray(parsed.recommendations) && parsed.recommendations.length) recommendations.splice(0, recommendations.length, ...parsed.recommendations.slice(0, 5))
+        }
+      } catch (aiErr) {
+        fastify.log.warn('Competitor AI verdict generation skipped: ' + aiErr.message)
+      }
+
+      return {
+        comparison: {
+          my_site: my,
+          competitor,
+          verdict,
+          recommendations
+        }
+      }
+    } catch (e) {
+      fastify.log.error(e)
+      return reply.code(500).send({ message: e.message })
+    }
+  })
 }
+
 
 
 
