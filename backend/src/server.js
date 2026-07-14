@@ -8,6 +8,11 @@ import auditRoutes from './routes/audit.js'
 import historyRoutes from './routes/history.js'
 import paymentRoutes from './routes/payment.js'
 import competitorRoutes from './routes/competitor.js'
+import webhookRoutes from './routes/webhook.js'
+
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required and must not use a default value.')
+}
 
 const fastify = Fastify({ logger: true })
 
@@ -16,7 +21,7 @@ await fastify.register(supabasePlugin)
 await fastify.register(plansPlugin)
 
 await fastify.register(import('@fastify/jwt'), {
-  secret: process.env.JWT_SECRET || 'changethis'
+  secret: process.env.JWT_SECRET
 })
 
 fastify.decorate('authenticate', async (req, reply) => {
@@ -32,10 +37,11 @@ await fastify.register(auditRoutes, { prefix: '/api/audit' })
 await fastify.register(historyRoutes, { prefix: '/api/history' })
 await fastify.register(paymentRoutes, { prefix: '/api/payment' })
 await fastify.register(competitorRoutes, { prefix: '/api/competitor' })
+await fastify.register(webhookRoutes, { prefix: '/api/webhook' })
 
 fastify.get('/health', async () => ({ status: 'ok' }))
 
 const port = process.env.PORT || 3001
 await fastify.listen({ port, host: '0.0.0.0' })
 console.log(`Server running on port ${port}`)
- 
+

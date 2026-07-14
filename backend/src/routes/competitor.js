@@ -1,3 +1,5 @@
+import { assertSafeUrl } from '../utils/urlGuard.js'
+
 export default async function competitorRoutes(fastify) {
 
   // ─── Helper: Fetch Real Website Data ─────────────────────────────────────────
@@ -144,12 +146,22 @@ export default async function competitorRoutes(fastify) {
 
   // ─── Competitor Analysis ──────────────────────────────────────────────────────
   fastify.post('/analyze', { onRequest: [fastify.authenticate] }, async (req, reply) => {
-    const { url, competitor_url } = req.body
+    const { url: rawUrl, competitor_url: rawCompetitorUrl } = req.body
     const userId = req.user.id
-    if (!url || !competitor_url) return reply.code(400).send({ message: 'Both URLs are required' })
+    if (!rawUrl || !rawCompetitorUrl) return reply.code(400).send({ message: 'Both URLs are required' })
 
     const gate = await fastify.requirePaidPlan(userId, 'Competitor Analysis')
     if (gate) return reply.code(403).send(gate)
+
+    let url, competitor_url
+    try {
+      [url, competitor_url] = await Promise.all([
+        assertSafeUrl(rawUrl),
+        assertSafeUrl(rawCompetitorUrl)
+      ])
+    } catch (e) {
+      return reply.code(400).send({ message: e.message })
+    }
 
     try {
       const [myData, compData, myPS, compPS] = await Promise.all([

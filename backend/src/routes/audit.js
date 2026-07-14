@@ -1,3 +1,5 @@
+import { assertSafeUrl } from '../utils/urlGuard.js'
+
 export default async function auditRoutes(fastify) {
 
   // ─── Helper: Fetch Real Website Data ─────────────────────────────────────────
@@ -256,9 +258,16 @@ export default async function auditRoutes(fastify) {
 
   // ─── Run Audit ───────────────────────────────────────────────────────────────
   fastify.post('/run', { onRequest: [fastify.authenticate] }, async (req, reply) => {
-    const { url } = req.body
+    const { url: rawUrl } = req.body
     const userId = req.user.id
-    if (!url) return reply.code(400).send({ message: 'URL is required' })
+    if (!rawUrl) return reply.code(400).send({ message: 'URL is required' })
+
+    let url
+    try {
+      url = await assertSafeUrl(rawUrl)
+    } catch (e) {
+      return reply.code(400).send({ message: e.message })
+    }
 
     // Free plan wale users ko 3 audits/month tak limit karo
     const plan = await fastify.getUserPlan(userId)
@@ -339,8 +348,18 @@ export default async function auditRoutes(fastify) {
 
   // ─── Competitor Analysis ──────────────────────────────────────────────────────
   fastify.post('/compare', { onRequest: [fastify.authenticate] }, async (req, reply) => {
-    const { myUrl, competitorUrl } = req.body
-    if (!myUrl || !competitorUrl) return reply.code(400).send({ message: 'Both URLs are required' })
+    const { myUrl: rawMyUrl, competitorUrl: rawCompetitorUrl } = req.body
+    if (!rawMyUrl || !rawCompetitorUrl) return reply.code(400).send({ message: 'Both URLs are required' })
+
+    let myUrl, competitorUrl
+    try {
+      [myUrl, competitorUrl] = await Promise.all([
+        assertSafeUrl(rawMyUrl),
+        assertSafeUrl(rawCompetitorUrl)
+      ])
+    } catch (e) {
+      return reply.code(400).send({ message: e.message })
+    }
 
     try {
       const [myData, compData, myPS, compPS] = await Promise.all([
@@ -399,10 +418,10 @@ export default async function auditRoutes(fastify) {
     const { title, desc, fix } = req.body
     if (!title) return reply.code(400).send({ message: 'Issue title is required' })
     const prompt = `You are a web developer. A website has this issue:
-Issue: ${title}
-Description: ${desc}
-Suggested fix: ${fix}
-Provide ONLY the ready-to-use code fix (HTML/CSS/JS) with a brief one-line comment. No explanation, just code.`
+ Issue: ${title}
+ Description: ${desc}
+ Suggested fix: ${fix}
+ Provide ONLY the ready-to-use code fix (HTML/CSS/JS) with a brief one-line comment. No explanation, just code.`
     try {
       const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
